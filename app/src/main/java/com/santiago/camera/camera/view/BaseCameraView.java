@@ -7,7 +7,6 @@ import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
 import com.santiago.camera.R;
-import com.santiago.camera.camera.utils.CameraSurfaceCallback;
 import com.santiago.camera.camera.utils.CameraSurfaceHolder;
 
 /**

@@ -5,13 +5,13 @@ import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.View;
 
+import com.santiago.camera.camera.utils.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.CameraSurfaceHolder;
 import com.santiago.camera.configs.CameraManager;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
 import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
 import com.santiago.event.listeners.EventNotifierListener;
-import com.santiago.camera.camera.utils.CameraSurfaceCallback;
 
 import java.io.IOException;
 
@@ -20,10 +20,10 @@ import java.io.IOException;
  *
  * Created by santiago on 09/03/16.
  */
-public abstract class BaseCameraController<T extends View & CameraSurfaceHolder> extends BaseEventController<T> implements CameraSurfaceCallback.CameraSurfaceCallbackListener {
+public abstract class BaseCameraController<T extends View & CameraSurfaceHolder> extends BaseEventController<T> implements CameraSurfaceHandler.CameraSurfaceCallbackListener {
 
     private SurfaceHolder surfaceHolder;
-    private CameraSurfaceCallback cameraSurfaceCallback;
+    private CameraSurfaceHandler cameraSurfaceHandler;
 
     private CameraManager cameraManager;
 
@@ -49,21 +49,21 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder>
     protected void onViewAttached(T t) {
         surfaceHolder = t.getSurfaceHolder();
 
-        cameraSurfaceCallback = new CameraSurfaceCallback(camera);
-        cameraSurfaceCallback.setListener(this);
+        cameraSurfaceHandler = new CameraSurfaceHandler(camera);
+        cameraSurfaceHandler.setListener(this);
 
         //In case they dont set us an EventHandler, we do it on our own because we will need to broadcast things internally. If they do then dont mind this
         setEventHandlerListener(new EventManager(getContext()));
 
-        //As soon as we are setting him a callback, process will start and we will eventually be notified (in the cameraSurfaceCallback class about its creation)
-        surfaceHolder.addCallback(cameraSurfaceCallback);
+        //As soon as we are setting him a callback, process will start and we will eventually be notified (in the cameraSurfaceHandler class about its creation)
+        surfaceHolder.addCallback(cameraSurfaceHandler);
     }
 
     @Override
     public void setEventHandlerListener(EventManager eventManager) {
         super.setEventHandlerListener(eventManager);
 
-        cameraSurfaceCallback.setEventHandler(eventManager);
+        cameraSurfaceHandler.setEventHandler(eventManager);
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder>
 
                 @Override
                 public void onCameraModified() {
-                    cameraSurfaceCallback.setCamera(camera);
+                    cameraSurfaceHandler.setCamera(camera);
                 }
             };
         }

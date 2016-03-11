@@ -3,9 +3,9 @@ package com.santiago.camera.camera.utils;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 
-import com.santiago.event.EventManager;
 import com.santiago.camera.event.camera_surface_callback.OnSurfaceCreatedEvent;
 import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
+import com.santiago.event.EventManager;
 
 /**
  * Class that interacts with the callbacks of the surface holders and notifies the user about certain events
@@ -14,7 +14,7 @@ import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChan
  *
  * Created by santiago on 09/03/16.
  */
-public class CameraSurfaceCallback implements SurfaceHolder.Callback {
+public class CameraSurfaceHandler implements SurfaceHolder.Callback {
 
     private Camera camera;
 
@@ -22,7 +22,7 @@ public class CameraSurfaceCallback implements SurfaceHolder.Callback {
 
     private CameraSurfaceCallbackListener listener;
 
-    public CameraSurfaceCallback(Camera camera) {
+    public CameraSurfaceHandler(Camera camera) {
         this.camera = camera;
     }
 
