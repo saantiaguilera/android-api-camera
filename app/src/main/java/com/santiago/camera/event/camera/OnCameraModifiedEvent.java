@@ -1,14 +1,13 @@
-package com.santiago.resizeablecamera.event.camera_surface_callback;
+package com.santiago.camera.event.camera;
 
 import com.santiago.event.Event;
 import com.santiago.event.listeners.EventHandler;
 import com.santiago.event.listeners.EventNotifierListener;
 
 /**
- * Created by santiago on 09/03/16.
+ * Created by santiago on 10/03/16.
  */
-public class OnSurfaceCreatedEvent implements Event {
-
+public class OnCameraModifiedEvent implements Event {
     @Override
     public boolean handle(EventHandler handler) {
         return false;
@@ -16,6 +15,7 @@ public class OnSurfaceCreatedEvent implements Event {
 
     @Override
     public void notify(EventNotifierListener listener) {
-        listener.onCameraSurfaceCreated();
+        listener.onCameraModified();
     }
+
 }

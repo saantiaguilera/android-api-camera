@@ -1,11 +1,11 @@
-package com.santiago.resizeablecamera.camera.utils;
+package com.santiago.camera.camera.utils;
 
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 
 import com.santiago.event.EventManager;
-import com.santiago.resizeablecamera.event.camera_surface_callback.OnSurfaceCreatedEvent;
-import com.santiago.resizeablecamera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
+import com.santiago.camera.event.camera_surface_callback.OnSurfaceCreatedEvent;
+import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
 
 /**
  * Class that interacts with the callbacks of the surface holders and notifies the user about certain events
@@ -55,7 +55,7 @@ public class CameraSurfaceCallback implements SurfaceHolder.Callback {
     }
 
     /**
-     * Called when the surface has finished being created
+     * Called when the surface has being created
      * @param holder
      */
     public void surfaceCreated(SurfaceHolder holder) {
@@ -72,6 +72,9 @@ public class CameraSurfaceCallback implements SurfaceHolder.Callback {
      * @param height
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        if(camera==null)
+            return;
+
         //Data will be using
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size;

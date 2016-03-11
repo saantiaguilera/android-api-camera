@@ -1,4 +1,4 @@
-package com.santiago.resizeablecamera.utils;
+package com.santiago.camera.utils;
 
 /**
  * Created by santi on 29/06/15.
@@ -18,7 +18,7 @@ import android.util.Base64;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.santiago.resizeablecamera.R;
+import com.santiago.camera.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

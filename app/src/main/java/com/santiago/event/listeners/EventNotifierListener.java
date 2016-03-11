@@ -12,5 +12,8 @@ public abstract class EventNotifierListener {
     public void onCameraSurfaceCreated() {};
     public void onSurfaceVisibilityChanged(boolean visibility) {};
 
+    //Camera
+    public void onCameraModified() {};
+
 
 }

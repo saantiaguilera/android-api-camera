@@ -1,4 +1,4 @@
-package com.santiago.resizeablecamera.camera.view;
+package com.santiago.camera.camera.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,15 +6,16 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
-import com.santiago.resizeablecamera.R;
-import com.santiago.resizeablecamera.camera.utils.CameraSurfaceCallback;
+import com.santiago.camera.R;
+import com.santiago.camera.camera.utils.CameraSurfaceCallback;
+import com.santiago.camera.camera.utils.CameraSurfaceHolder;
 
 /**
  * View representing the basic camera
  *
  * Created by santiago on 09/03/16.
  */
-public abstract class BaseCameraView extends FrameLayout implements CameraSurfaceCallback.CameraSurfaceCallbackListener {
+public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder {
 
     private SurfaceView surfaceView;
 
@@ -30,6 +31,7 @@ public abstract class BaseCameraView extends FrameLayout implements CameraSurfac
         surfaceView = (SurfaceView) findViewById(R.id.view_base_camera_surface_view);
     }
 
+    @Override
     public SurfaceHolder getSurfaceHolder() {
         return surfaceView.getHolder();
     }

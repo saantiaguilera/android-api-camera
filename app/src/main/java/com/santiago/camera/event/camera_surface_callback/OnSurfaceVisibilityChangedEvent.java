@@ -1,4 +1,4 @@
-package com.santiago.resizeablecamera.event.camera_surface_callback;
+package com.santiago.camera.event.camera_surface_callback;
 
 import com.santiago.event.Event;
 import com.santiago.event.listeners.EventHandler;
