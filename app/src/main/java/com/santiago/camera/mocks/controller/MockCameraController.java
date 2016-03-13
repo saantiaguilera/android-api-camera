@@ -45,6 +45,7 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
                 @Override
                 public void mockFlashChange(int flashMode) {
                     flashConfiguration.setFlashlight(flashMode==MockFlashController.FLASH_ON ? Camera.Parameters.FLASH_MODE_ON : Camera.Parameters.FLASH_MODE_OFF);
+                    startCamera();
                 }
 
                 @Override
