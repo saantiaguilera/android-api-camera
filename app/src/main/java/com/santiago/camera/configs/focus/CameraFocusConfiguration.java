@@ -1,4 +1,4 @@
-package com.santiago.camera.configs;
+package com.santiago.camera.configs.focus;
 
 import android.content.Context;
 import android.hardware.Camera;

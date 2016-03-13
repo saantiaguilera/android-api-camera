@@ -3,6 +3,8 @@ package com.santiago.camera.configs;
 import android.content.Context;
 import android.hardware.Camera;
 
+import com.santiago.camera.configs.flashlight.CameraFlashlightConfiguration;
+import com.santiago.camera.configs.focus.CameraFocusConfiguration;
 import com.santiago.camera.configs.orientation.CameraOrientationConfiguration;
 import com.santiago.camera.configs.type.CameraType;
 import com.santiago.camera.configs.type.CameraTypeConfiguration;
@@ -15,11 +17,13 @@ public class CameraManager {
     private CameraTypeConfiguration cameraTypeConfiguration;
     private CameraOrientationConfiguration cameraOrientationConfiguration;
     private CameraFocusConfiguration cameraFocusConfiguration;
+    private CameraFlashlightConfiguration cameraFlashlightConfiguration;
 
     public CameraManager(Context context) {
         cameraTypeConfiguration = new CameraTypeConfiguration(context);
         cameraOrientationConfiguration = new CameraOrientationConfiguration(context);
         cameraFocusConfiguration = new CameraFocusConfiguration(context);
+        cameraFlashlightConfiguration = new CameraFlashlightConfiguration(context);
     }
 
     public CameraOrientationConfiguration getCameraOrientationConfiguration() {
@@ -34,6 +38,10 @@ public class CameraManager {
         return cameraFocusConfiguration;
     }
 
+    public CameraFlashlightConfiguration getCameraFlashlightConfiguration() {
+        return cameraFlashlightConfiguration;
+    }
+
     public Camera createNewCamera() {
         //Get the current type of camera (Front/Back). If the user has override the method for implementing a custom one, use theirs as long as it exists. If not ours
         CameraType currentCamera = getCameraTypeConfiguration().getCurrentCamera();
@@ -46,6 +54,9 @@ public class CameraManager {
 
         //Lets set a focus mode
         camera.setParameters(getCameraFocusConfiguration().applyFocus(camera.getParameters()));
+
+        //Set flaslight mode
+        camera.setParameters(getCameraFlashlightConfiguration().applyFlashlight(camera.getParameters()));
 
         return camera;
     }
