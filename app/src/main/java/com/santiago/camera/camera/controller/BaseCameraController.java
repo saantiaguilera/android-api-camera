@@ -1,10 +1,12 @@
 package com.santiago.camera.camera.controller;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.View;
 
+import com.santiago.camera.camera.utils.CameraPictureCallback;
 import com.santiago.camera.camera.utils.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.CameraSurfaceHolder;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
@@ -20,7 +22,7 @@ import java.io.IOException;
  *
  * Created by santiago on 09/03/16.
  */
-public abstract class BaseCameraController<T extends View & CameraSurfaceHolder> extends BaseEventController<T> implements CameraSurfaceHandler.CameraSurfaceCallbackListener {
+public abstract class BaseCameraController<T extends View & CameraSurfaceHolder & CameraPictureCallback> extends BaseEventController<T> implements CameraSurfaceHandler.CameraSurfaceCallbackListener {
 
     private SurfaceHolder surfaceHolder;
     private CameraSurfaceHandler cameraSurfaceHandler;
@@ -115,13 +117,26 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder>
     }
 
     public void takePicture() {
-        //TODO
+        camera.takePicture(null, null, new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data, Camera camera) {
+                //Set the picture
+                getView().onPictureTaken(BitmapFactory.decodeByteArray(data, 0, data.length));
+                getView().onPictureVisibilityChanged(View.VISIBLE);
+
+                //Stop the camera since it wont be used while the picture is showing
+                stopCamera();
+            }
+        });
     }
 
     /**
      * Call for starting the camera
      */
     public void startCamera() {
+        //Hide the picture if its visible
+        getView().onPictureVisibilityChanged(View.GONE);
+
         //If the camera is already running, stop it
         if(camera!=null)
             stopCamera();

@@ -30,6 +30,8 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
         super(context, baseCameraView);
 
         flashConfiguration = new CameraFlashlightConfiguration(context);
+        flashConfiguration.setFlashlight(Camera.Parameters.FLASH_MODE_OFF);
+
         focusConfiguration = new CameraFocusConfiguration(context);
 
         getCameraManager().addConfiguration(flashConfiguration);
@@ -47,11 +49,9 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
                 @Override
                 public void mockShootChange(int cameraMode) {
-                    if(cameraMode == MockShootController.CAMERA_ENABLED) {
+                    if(cameraMode == MockShootController.CAMERA_ENABLED)
                         startCamera();
-                    } else {
-                        takePicture();
-                    }
+                    else takePicture();
                 }
 
                 @Override

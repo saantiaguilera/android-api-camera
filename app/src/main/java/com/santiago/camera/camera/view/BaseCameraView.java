@@ -1,12 +1,15 @@
 package com.santiago.camera.camera.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.santiago.camera.R;
+import com.santiago.camera.camera.utils.CameraPictureCallback;
 import com.santiago.camera.camera.utils.CameraSurfaceHolder;
 
 /**
@@ -14,9 +17,10 @@ import com.santiago.camera.camera.utils.CameraSurfaceHolder;
  *
  * Created by santiago on 09/03/16.
  */
-public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder {
+public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder, CameraPictureCallback {
 
     private SurfaceView surfaceView;
+    private ImageView pictureView;
 
     public BaseCameraView(Context context) {
         this(context, null);
@@ -28,11 +32,22 @@ public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder {
         inflate(context, R.layout.view_base_camera, this);
 
         surfaceView = (SurfaceView) findViewById(R.id.view_base_camera_surface_view);
+        pictureView = (ImageView) findViewById(R.id.view_base_camera_picture);
     }
 
     @Override
     public SurfaceHolder getSurfaceHolder() {
         return surfaceView.getHolder();
+    }
+
+    @Override
+    public void onPictureTaken(Bitmap picture) {
+        pictureView.setImageBitmap(picture);
+    }
+
+    @Override
+    public void onPictureVisibilityChanged(int visibility) {
+        pictureView.setVisibility(visibility);
     }
 
 }
