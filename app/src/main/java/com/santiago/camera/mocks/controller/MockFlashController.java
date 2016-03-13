@@ -12,8 +12,8 @@ import com.santiago.controllers.BaseEventController;
  */
 public class MockFlashController extends BaseEventController<ImageView> {
 
-    public static final int FLASH_ON = 0;
-    public static final int FLASH_OFF = 1;
+    public static final int FLASH_OFF = 0;
+    public static final int FLASH_ON = 1;
 
     private int flashMode = FLASH_ON;
 
