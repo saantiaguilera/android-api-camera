@@ -1,4 +1,4 @@
-package com.santiago.camera.mocks;
+package com.santiago.camera.mocks.controller;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -7,6 +7,8 @@ import com.santiago.camera.camera.controller.BaseCameraController;
 import com.santiago.camera.camera.view.BaseCameraView;
 import com.santiago.camera.configs.flashlight.CameraFlashlightConfiguration;
 import com.santiago.camera.configs.focus.CameraFocusConfiguration;
+import com.santiago.camera.manager.type.CameraType;
+import com.santiago.event.listeners.EventNotifierListener;
 
 import java.util.List;
 
@@ -15,6 +17,11 @@ import java.util.List;
  */
 public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
+    private EventNotifierListener eventNotifierListener;
+
+    private CameraFlashlightConfiguration flashConfiguration;
+    private CameraFocusConfiguration focusConfiguration;
+
     public MockCameraController(Context context) {
         super(context);
     }
@@ -22,8 +29,40 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
     public MockCameraController(Context context, BaseCameraView baseCameraView) {
         super(context, baseCameraView);
 
-        getCameraManager().addConfiguration(new CameraFlashlightConfiguration(context));
-        getCameraManager().addConfiguration(new CameraFocusConfiguration(context));
+        flashConfiguration = new CameraFlashlightConfiguration(context);
+        focusConfiguration = new CameraFocusConfiguration(context);
+
+        getCameraManager().addConfiguration(flashConfiguration);
+        getCameraManager().addConfiguration(focusConfiguration);
+    }
+
+    @Override
+    protected EventNotifierListener getEventNotifierListener() {
+        if(eventNotifierListener == null) {
+            eventNotifierListener = new EventNotifierListener() {
+                @Override
+                public void mockFlashChange(int flashMode) {
+                    flashConfiguration.setFlashlight(flashMode==MockFlashController.FLASH_ON ? Camera.Parameters.FLASH_MODE_ON : Camera.Parameters.FLASH_MODE_OFF);
+                }
+
+                @Override
+                public void mockShootChange(int cameraMode) {
+                    if(cameraMode == MockShootController.CAMERA_ENABLED) {
+                        startCamera();
+                    } else {
+                        takePicture();
+                    }
+                }
+
+                @Override
+                public void mockSwitchCameraChange(CameraType cameraType) {
+                    getCameraManager().getCameraTypeManager().setCamera(cameraType);
+                    startCamera();
+                }
+            };
+        }
+
+        return eventNotifierListener;
     }
 
     @Override

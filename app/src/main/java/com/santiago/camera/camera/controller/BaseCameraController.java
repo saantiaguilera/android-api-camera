@@ -114,6 +114,10 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder>
         }
     }
 
+    public void takePicture() {
+        //TODO
+    }
+
     /**
      * Call for starting the camera
      */

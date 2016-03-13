@@ -27,7 +27,7 @@ public class CameraFlashlightConfiguration implements CameraConfiguration {
         if(params==null)
             return null;
 
-        if (params.getSupportedFlashModes().contains(currentMode))
+        if (params.getSupportedFlashModes()!=null && params.getSupportedFlashModes().contains(currentMode))
             params.setFlashMode(currentMode);
 
         return params;

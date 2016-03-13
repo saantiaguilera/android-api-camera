@@ -1,11 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.santiago.camera.camera.view.BaseCameraView
         android:id="@+id/activity_mock_base_camera_view"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+
+        android:gravity="center"
+
+        android:background="@color/mock_transparent"
+        android:layout_gravity="bottom|center">
+
+        <ImageView
+            android:id="@+id/activity_mock_flash_button"
+
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:src="@drawable/mock_drawable_flash"/>
+
+        <ImageView
+            android:id="@+id/activity_mock_shoot_button"
+
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+
+            android:src="@drawable/mock_drawable_shoot"
+
+            android:scaleType="fitCenter"
+
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="30dp"/>
+
+        <ImageView
+            android:id="@+id/activity_mock_switch_camera"
+
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:src="@drawable/mock_switch_camera"/>
+
+    </LinearLayout>
+
+</FrameLayout>
