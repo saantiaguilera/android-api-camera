@@ -14,10 +14,12 @@ public class CameraManager {
 
     private CameraTypeConfiguration cameraTypeConfiguration;
     private CameraOrientationConfiguration cameraOrientationConfiguration;
+    private CameraFocusConfiguration cameraFocusConfiguration;
 
     public CameraManager(Context context) {
         cameraTypeConfiguration = new CameraTypeConfiguration(context);
         cameraOrientationConfiguration = new CameraOrientationConfiguration(context);
+        cameraFocusConfiguration = new CameraFocusConfiguration(context);
     }
 
     public CameraOrientationConfiguration getCameraOrientationConfiguration() {
@@ -26,6 +28,10 @@ public class CameraManager {
 
     public CameraTypeConfiguration getCameraTypeConfiguration() {
         return cameraTypeConfiguration;
+    }
+
+    public CameraFocusConfiguration getCameraFocusConfiguration() {
+        return cameraFocusConfiguration;
     }
 
     public Camera createNewCamera() {
@@ -37,6 +43,9 @@ public class CameraManager {
 
         //Since the display orientation behaves like shit in android, we have a config that interacts with it and makes it work as intended
         camera.setDisplayOrientation(getCameraOrientationConfiguration().determineDisplayOrientation(currentCamera));
+
+        //Lets set a focus mode
+        camera.setParameters(getCameraFocusConfiguration().applyFocus(camera.getParameters()));
 
         return camera;
     }

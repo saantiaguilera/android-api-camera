@@ -21,8 +21,6 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
         super(context, baseCameraView);
     }
 
-
-
     @Override
     public Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
         final double ASPECT_TOLERANCE = 0.1;
@@ -30,7 +28,8 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
 
-        if (parameters.getSupportedPreviewSizes() == null) return null;
+        if (parameters.getSupportedPreviewSizes() == null)
+            return null;
 
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
@@ -39,7 +38,10 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
         for (Camera.Size size : sizes) {
             double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                continue;
+
             if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
                 minDiff = Math.abs(size.height - targetHeight);
@@ -48,6 +50,7 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
         if (optimalSize == null) {
             minDiff = Double.MAX_VALUE;
+
             for (Camera.Size size : sizes) {
                 if (Math.abs(size.height - targetHeight) < minDiff) {
                     optimalSize = size;
@@ -55,6 +58,7 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
                 }
             }
         }
+
         return optimalSize;
     }
 
