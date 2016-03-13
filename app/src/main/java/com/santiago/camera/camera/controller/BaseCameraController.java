@@ -7,8 +7,8 @@ import android.view.View;
 
 import com.santiago.camera.camera.utils.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.CameraSurfaceHolder;
-import com.santiago.camera.configs.CameraManager;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
+import com.santiago.camera.manager.CameraManager;
 import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
 import com.santiago.event.listeners.EventNotifierListener;
@@ -91,7 +91,13 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder>
         return eventNotifierListener;
     }
 
-    /*-------------------Methods---------------------------------*/
+    /*----------------------Getters & Setters-------------------------*/
+
+    public CameraManager getCameraManager() {
+        return cameraManager;
+    }
+
+    /*---------------------------Methods---------------------------------*/
 
     /**
      * If the camera exists sets the surfaceholder in it

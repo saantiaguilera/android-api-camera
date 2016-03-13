@@ -3,10 +3,12 @@ package com.santiago.camera.configs.flashlight;
 import android.content.Context;
 import android.hardware.Camera;
 
+import com.santiago.camera.configs.CameraConfiguration;
+
 /**
  * Created by santiago on 13/03/16.
  */
-public class CameraFlashlightConfiguration {
+public class CameraFlashlightConfiguration implements CameraConfiguration {
 
     private Context context;
 
@@ -20,7 +22,8 @@ public class CameraFlashlightConfiguration {
         currentMode = mode;
     }
 
-    public Camera.Parameters applyFlashlight(Camera.Parameters params) {
+    @Override
+    public Camera.Parameters applyConfiguration(Camera.Parameters params) {
         if(params==null)
             return null;
 

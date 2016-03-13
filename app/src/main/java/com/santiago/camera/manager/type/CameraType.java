@@ -1,4 +1,4 @@
-package com.santiago.camera.configs.type;
+package com.santiago.camera.manager.type;
 
 import android.hardware.Camera;
 

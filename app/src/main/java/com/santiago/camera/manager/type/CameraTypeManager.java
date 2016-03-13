@@ -1,22 +1,20 @@
-package com.santiago.camera.configs.type;
+package com.santiago.camera.manager.type;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-
-import com.santiago.camera.configs.type.CameraType;
 
 /**
  * Class in charge of handling which camera is currently being used
  *
  * Created by santiago on 10/03/16.
  */
-public class CameraTypeConfiguration {
+public class CameraTypeManager {
 
     private Context context;
 
     private CameraType currentCamera;
 
-    public CameraTypeConfiguration(Context context) {
+    public CameraTypeManager(Context context) {
         this.context = context;
         this.currentCamera = getBackCamera();
     }

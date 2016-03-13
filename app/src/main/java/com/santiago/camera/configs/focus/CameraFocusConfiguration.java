@@ -3,10 +3,12 @@ package com.santiago.camera.configs.focus;
 import android.content.Context;
 import android.hardware.Camera;
 
+import com.santiago.camera.configs.CameraConfiguration;
+
 /**
  * Created by santiago on 13/03/16.
  */
-public class CameraFocusConfiguration {
+public class CameraFocusConfiguration implements CameraConfiguration {
 
     private Context context;
 
@@ -20,7 +22,8 @@ public class CameraFocusConfiguration {
         currentFocusMode = focusMode;
     }
 
-    public Camera.Parameters applyFocus(Camera.Parameters params) {
+    @Override
+    public Camera.Parameters applyConfiguration(Camera.Parameters params) {
         if(params==null)
             return null;
 

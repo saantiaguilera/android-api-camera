@@ -5,6 +5,8 @@ import android.hardware.Camera;
 
 import com.santiago.camera.camera.controller.BaseCameraController;
 import com.santiago.camera.camera.view.BaseCameraView;
+import com.santiago.camera.configs.flashlight.CameraFlashlightConfiguration;
+import com.santiago.camera.configs.focus.CameraFocusConfiguration;
 
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
     public MockCameraController(Context context, BaseCameraView baseCameraView) {
         super(context, baseCameraView);
+
+        getCameraManager().addConfiguration(new CameraFlashlightConfiguration(context));
+        getCameraManager().addConfiguration(new CameraFocusConfiguration(context));
     }
 
     @Override

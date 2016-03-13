@@ -1,23 +1,23 @@
-package com.santiago.camera.configs.orientation;
+package com.santiago.camera.manager.orientation;
 
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
 import android.view.Surface;
 
-import com.santiago.camera.configs.type.CameraType;
+import com.santiago.camera.manager.type.CameraType;
 
 /**
  * Created by santiago on 10/03/16.
  */
-public class CameraOrientationConfiguration {
+public class CameraOrientationManager {
 
     private Context context;
 
     private int mDisplayOrientation;
     private int mLayoutOrientation;
 
-    public CameraOrientationConfiguration(Context context) {
+    public CameraOrientationManager(Context context) {
         this.context = context;
     }
 
