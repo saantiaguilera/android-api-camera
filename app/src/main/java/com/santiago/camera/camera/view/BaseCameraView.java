@@ -9,8 +9,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.santiago.camera.R;
-import com.santiago.camera.camera.utils.CameraPictureCallback;
-import com.santiago.camera.camera.utils.CameraSurfaceHolder;
+import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
+import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 
 /**
  * View representing the basic camera

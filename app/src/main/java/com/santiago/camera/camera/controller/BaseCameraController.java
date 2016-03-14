@@ -1,14 +1,17 @@
 package com.santiago.camera.camera.controller;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.View;
 
-import com.santiago.camera.camera.utils.CameraPictureCallback;
-import com.santiago.camera.camera.utils.CameraSurfaceHandler;
-import com.santiago.camera.camera.utils.CameraSurfaceHolder;
+import com.santiago.camera.camera.utils.picture.BitmapUtils;
+import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
+import com.santiago.camera.camera.utils.picture.ExifReader;
+import com.santiago.camera.camera.utils.surface.CameraSurfaceHandler;
+import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
 import com.santiago.camera.manager.CameraManager;
 import com.santiago.controllers.BaseEventController;
@@ -120,12 +123,21 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         camera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
+                //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+                //Rotate picture acording to its EXIF data
+                Bitmap rotatedBitmap = BitmapUtils.RotateBitmap(bitmap, ExifReader.getRotation(data));
+
                 //Set the picture
-                getView().onPictureTaken(BitmapFactory.decodeByteArray(data, 0, data.length));
+                getView().onPictureTaken(rotatedBitmap);
                 getView().onPictureVisibilityChanged(View.VISIBLE);
 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
+
+                //Notify
+                onPictureGenerated(rotatedBitmap);
             }
         });
     }
@@ -190,5 +202,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      */
     @Override
     public abstract Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters);
+
+    protected abstract void onPictureGenerated(Bitmap bitmap);
 
 }

@@ -1,4 +1,4 @@
-package com.santiago.camera.camera.utils;
+package com.santiago.camera.camera.utils.picture;
 
 import android.graphics.Bitmap;
 

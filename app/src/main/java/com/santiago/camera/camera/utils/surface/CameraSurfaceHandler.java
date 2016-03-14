@@ -1,4 +1,4 @@
-package com.santiago.camera.camera.utils;
+package com.santiago.camera.camera.utils.surface;
 
 import android.hardware.Camera;
 import android.view.SurfaceHolder;

@@ -1,6 +1,7 @@
 package com.santiago.camera.mocks.controller;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 
 import com.santiago.camera.camera.controller.BaseCameraController;
@@ -65,6 +66,9 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
 
         return eventNotifierListener;
     }
+
+    @Override
+    protected void onPictureGenerated(Bitmap bitmap) { }
 
     @Override
     public Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
