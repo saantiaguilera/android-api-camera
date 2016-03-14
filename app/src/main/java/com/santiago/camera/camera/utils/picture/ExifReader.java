@@ -14,9 +14,10 @@ import java.util.Date;
  */
 public class ExifReader {
 
-    public static int getRotation(byte[] data) {
+    public static CameraExifData getExifData(byte[] data) {
         //Initialize variables
         int rotation = 0;
+        Flip flip = Flip.NORMAL;
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + File.separator + timeStamp + ".jpeg";
 
@@ -35,14 +36,30 @@ public class ExifReader {
             ExifInterface exif= new ExifInterface(pictureFile.toString());
             String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
 
-            if(orientation.equalsIgnoreCase("6"))
-                rotation = 90;
-            else if(orientation.equalsIgnoreCase("8"))
-                rotation = 270;
-            else if(orientation.equalsIgnoreCase("3"))
-                rotation = 180;
-            else if(orientation.equalsIgnoreCase("0"))
-                rotation = 90;
+            switch(Integer.valueOf(orientation)) {
+                case ExifInterface.ORIENTATION_UNDEFINED:
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotation = 90;
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotation = 270;
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotation = 180;
+                    break;
+            }
+
+            switch(Integer.valueOf(orientation)) {
+                case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                    flip = Flip.HORIZONTAL;
+                    break;
+
+                case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                    flip = Flip.VERTICAL;
+                    break;
+            }
 
             //Close the stream
             fos.close();
@@ -53,7 +70,49 @@ public class ExifReader {
         //Remove the created file
         pictureFile.delete();
 
-        return rotation;
+        return new CameraExifData(rotation, flip);
+    }
+
+    public static class CameraExifData {
+
+        private int rotation;
+        private Flip flip;
+
+        public CameraExifData(int rotation, Flip flip) {
+            this.rotation = rotation;
+            this.flip = flip;
+        }
+
+        public Flip getFlip() {
+            return flip;
+        }
+
+        public int getRotation() {
+            return rotation;
+        }
+
+    }
+
+    public enum Flip {
+
+        NORMAL(Flip.NORMAL_INDEX),
+        HORIZONTAL(Flip.HORIZONTAL_INDEX),
+        VERTICAL(Flip.VERTICAL_INDEX);
+
+        public static final int NORMAL_INDEX = 0;
+        public static final int HORIZONTAL_INDEX = 1;
+        public static final int VERTICAL_INDEX = 2;
+
+        private final int index;
+
+        Flip(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
     }
 
 }

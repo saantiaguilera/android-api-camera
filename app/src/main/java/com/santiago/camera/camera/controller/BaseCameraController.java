@@ -126,18 +126,19 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-                //Rotate picture acording to its EXIF data
-                Bitmap rotatedBitmap = BitmapUtils.RotateBitmap(bitmap, ExifReader.getRotation(data));
+                //Modify picture acording to its EXIF data
+                ExifReader.CameraExifData exifData = ExifReader.getExifData(data);
+                Bitmap newBitmap = BitmapUtils.ChangeBitmapFromExif(bitmap, exifData);
 
                 //Set the picture
-                getView().onPictureTaken(rotatedBitmap);
+                getView().onPictureTaken(newBitmap);
                 getView().onPictureVisibilityChanged(View.VISIBLE);
 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
 
                 //Notify
-                onPictureGenerated(rotatedBitmap);
+                onPictureGenerated(newBitmap);
             }
         });
     }

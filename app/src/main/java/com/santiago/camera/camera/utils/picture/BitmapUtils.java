@@ -8,10 +8,21 @@ import android.graphics.Matrix;
  */
 public class BitmapUtils {
 
-    public static Bitmap RotateBitmap(Bitmap source, float angle) {
+    public static Bitmap ChangeBitmapFromExif(Bitmap source, ExifReader.CameraExifData exifData) {
         Matrix matrix = new Matrix();
 
-        matrix.postRotate(angle);
+        //Apply rotation
+        matrix.postRotate(exifData.getRotation());
+
+        //Apply a flip depending which was
+        switch(exifData.getFlip().getIndex()) {
+            case ExifReader.Flip.HORIZONTAL_INDEX:
+                matrix.preScale(-1, 1);
+                break;
+
+            case ExifReader.Flip.VERTICAL_INDEX:
+                matrix.preScale(1, -1);
+        }
 
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
