@@ -3,6 +3,9 @@ package com.santiago.camera.manager.type;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.santiago.camera.event.camera.type.OnCameraTypeChangeEvent;
+import com.santiago.event.EventManager;
+
 /**
  * Class in charge of handling which camera is currently being used
  *
@@ -11,18 +14,22 @@ import android.content.pm.PackageManager;
 public class CameraTypeManager {
 
     private Context context;
+    private EventManager eventManager;
 
     private CameraType currentCamera;
 
-    public CameraTypeManager(Context context) {
+    public CameraTypeManager(Context context, EventManager eventManager) {
         this.context = context;
-        this.currentCamera = getBackCamera();
+        this.eventManager = eventManager;
+        eventManager.addListener(this);
     }
 
     public void setCamera(CameraType camera) {
-        if (currentCamera == CameraType.FRONT)
+        if (camera == CameraType.FRONT)
             currentCamera = getBackCamera();
         else currentCamera = getFrontCamera();
+
+        eventManager.broadcastEvent(new OnCameraTypeChangeEvent(currentCamera));
     }
 
     public CameraType getCurrentCamera() { return currentCamera; }

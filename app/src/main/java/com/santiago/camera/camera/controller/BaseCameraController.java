@@ -7,15 +7,15 @@ import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.View;
 
-import com.santiago.camera.camera.utils.picture.BitmapUtils;
 import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
-import com.santiago.camera.camera.utils.picture.ExifReader;
+import com.santiago.camera.camera.utils.picture.CameraPictureUtilities;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
-import com.santiago.camera.event.camera_surface_callback.OnSurfaceCreatedEvent;
-import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
+import com.santiago.camera.event.camera.surface_callback.OnSurfaceCreatedEvent;
+import com.santiago.camera.event.camera.surface_callback.OnSurfaceVisibilityChangedEvent;
 import com.santiago.camera.manager.CameraManager;
+import com.santiago.camera.manager.orientation.CameraOrientationManager;
 import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
 import com.santiago.event.anotation.EventMethod;
@@ -95,25 +95,33 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     }
 
     public void takePicture() {
+        cameraManager.prepareForPicture();
+
         camera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
                 //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-                //Modify picture acording to its EXIF data
-                ExifReader.CameraExifData exifData = ExifReader.getExifData(data);
-                Bitmap newBitmap = BitmapUtils.ChangeBitmapFromExif(bitmap, exifData);
+                boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType()==Camera.CameraInfo.CAMERA_FACING_FRONT;
+                CameraOrientationManager orientationManager = cameraManager.getCameraOrientationManager();
+
+                int rotation = CameraPictureUtilities.getRotation(orientationManager.getDisplayOrientation(), orientationManager.getNormalOrientation(), orientationManager.getLayoutOrientation(), isFrontCamera);
+
+                bitmap = CameraPictureUtilities.rotatePicture(getContext(), rotation, bitmap);
+
+                if(isFrontCamera)
+                    bitmap = CameraPictureUtilities.mirrorImage(bitmap);
 
                 //Set the picture
-                getView().onPictureTaken(newBitmap);
+                getView().onPictureTaken(bitmap);
                 getView().onPictureVisibilityChanged(View.VISIBLE);
 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
 
                 //Notify
-                onPictureGenerated(newBitmap);
+                onPictureGenerated(bitmap);
             }
         });
     }
@@ -157,6 +165,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      * <strong> Always call this when you finished using the camera to make it available to others </strong>
      */
     public void stopCamera() {
+        if(camera==null)
+            return;
+
         if (surfaceActive)
             camera.stopPreview();
 

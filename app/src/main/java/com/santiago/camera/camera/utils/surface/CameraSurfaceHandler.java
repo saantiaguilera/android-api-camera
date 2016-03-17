@@ -3,8 +3,8 @@ package com.santiago.camera.camera.utils.surface;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 
-import com.santiago.camera.event.camera_surface_callback.OnSurfaceCreatedEvent;
-import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
+import com.santiago.camera.event.camera.surface_callback.OnSurfaceCreatedEvent;
+import com.santiago.camera.event.camera.surface_callback.OnSurfaceVisibilityChangedEvent;
 import com.santiago.event.EventManager;
 
 /**

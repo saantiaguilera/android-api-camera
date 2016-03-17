@@ -7,6 +7,7 @@ import com.santiago.camera.configs.CameraConfiguration;
 import com.santiago.camera.manager.orientation.CameraOrientationManager;
 import com.santiago.camera.manager.type.CameraType;
 import com.santiago.camera.manager.type.CameraTypeManager;
+import com.santiago.event.EventManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +17,24 @@ import java.util.List;
  */
 public class CameraManager {
 
+    private EventManager eventManager;
+
     private CameraTypeManager cameraTypeManager;
     private CameraOrientationManager cameraOrientationManager;
 
     private List<CameraConfiguration> configurations = new ArrayList<>();
 
     public CameraManager(Context context) {
+        //Create an internal eventmanager we will use to broadcast our stuff
+        eventManager = new EventManager(context);
+        eventManager.addListener(this);
+
         //Initialize our managers
-        cameraTypeManager = new CameraTypeManager(context);
-        cameraOrientationManager = new CameraOrientationManager(context);
+        cameraTypeManager = new CameraTypeManager(context, eventManager);
+        cameraOrientationManager = new CameraOrientationManager(context, eventManager);
+
+        //Set default vars
+        cameraTypeManager.setCamera(CameraType.BACK);
     }
 
     public void addConfiguration(CameraConfiguration configuration) {
@@ -50,6 +60,10 @@ public class CameraManager {
         return cameraTypeManager;
     }
 
+    public void prepareForPicture() {
+        cameraOrientationManager.prepareForPicture();
+    }
+
     public Camera createNewCamera() {
         //Get the current type of camera (Front/Back). If the user has override the method for implementing a custom one, use theirs as long as it exists. If not ours
         CameraType currentCamera = getCameraTypeManager().getCurrentCamera();
@@ -58,7 +72,7 @@ public class CameraManager {
         Camera camera = Camera.open(currentCamera.getCameraType());
 
         //Since the display orientation behaves like shit in android, we have a config that interacts with it and makes it work as intended
-        camera.setDisplayOrientation(getCameraOrientationManager().determineDisplayOrientation(currentCamera));
+        camera.setDisplayOrientation(getCameraOrientationManager().getDisplayOrientation());
 
         //Apply the configurations
         for(CameraConfiguration configuration : configurations)
