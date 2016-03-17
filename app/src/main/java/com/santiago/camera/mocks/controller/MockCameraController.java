@@ -4,11 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 
+import com.santiago.camera.R;
 import com.santiago.camera.camera.controller.BaseCameraController;
 import com.santiago.camera.camera.view.BaseCameraView;
 import com.santiago.camera.configs.flashlight.CameraFlashlightConfiguration;
 import com.santiago.camera.configs.focus.CameraFocusConfiguration;
 import com.santiago.camera.mocks.event.MockFlashChangedEvent;
+import com.santiago.camera.mocks.event.MockOnCameraStartEvent;
+import com.santiago.camera.mocks.event.MockOnPictureTakenEvent;
 import com.santiago.camera.mocks.event.MockShootChangedEvent;
 import com.santiago.camera.mocks.event.MockSwitchCameraChangedEvent;
 import com.santiago.event.anotation.EventMethod;
@@ -39,6 +42,12 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
         getCameraManager().addConfiguration(focusConfiguration);
     }
 
+    @Override
+    protected void onViewAttached(BaseCameraView baseCameraView) {
+        super.onViewAttached(baseCameraView);
+        baseCameraView.setBackgroundColor(getContext().getResources().getColor(R.color.mock_black));
+    }
+
     @EventMethod(MockFlashChangedEvent.class)
     private void onFlashChange(MockFlashChangedEvent event) {
         flashConfiguration.setFlashlight(event.getFlashMode() == MockFlashController.FLASH_ON ? Camera.Parameters.FLASH_MODE_ON : Camera.Parameters.FLASH_MODE_OFF);
@@ -59,7 +68,15 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
     }
 
     @Override
-    protected void onPictureGenerated(Bitmap bitmap) { }
+    public void startCamera() {
+        super.startCamera();
+        broadcastEvent(new MockOnCameraStartEvent());
+    }
+
+    @Override
+    protected void onPictureGenerated(Bitmap bitmap) {
+        broadcastEvent(new MockOnPictureTakenEvent());
+    }
 
     @Override
     public Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {

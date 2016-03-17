@@ -77,7 +77,11 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         return cameraManager;
     }
 
-    /*---------------------------Methods---------------------------------*/
+    /**
+     * If the camera is showing or not
+     * @return
+     */
+    public boolean isCameraActive() { return surfaceActive; }
 
     /**
      * If the camera exists sets the surfaceholder in it
@@ -94,6 +98,11 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         }
     }
 
+    /*---------------------------Methods---------------------------------*/
+
+    /**
+     * Take a picture and show it in the view
+     */
     public void takePicture() {
         cameraManager.prepareForPicture();
 

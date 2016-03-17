@@ -48,6 +48,7 @@ public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder, 
     @Override
     public void onPictureVisibilityChanged(int visibility) {
         pictureView.setVisibility(visibility);
+        surfaceView.setVisibility(visibility==VISIBLE ? INVISIBLE : VISIBLE);
     }
 
 }

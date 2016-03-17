@@ -5,7 +5,10 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.santiago.camera.mocks.event.MockFlashChangedEvent;
+import com.santiago.camera.mocks.event.MockOnCameraStartEvent;
+import com.santiago.camera.mocks.event.MockOnPictureTakenEvent;
 import com.santiago.controllers.BaseEventController;
+import com.santiago.event.anotation.EventMethod;
 
 /**
  * Created by santiago on 13/03/16.
@@ -45,6 +48,16 @@ public class MockFlashController extends BaseEventController<ImageView> {
         }
 
         broadcastEvent(new MockFlashChangedEvent(flashMode));
+    }
+
+    @EventMethod(MockOnPictureTakenEvent.class)
+    private void onPictureTaken() {
+        getView().setVisibility(View.INVISIBLE);
+    }
+
+    @EventMethod(MockOnCameraStartEvent.class)
+    private void onCameraStart() {
+        getView().setVisibility(View.VISIBLE);
     }
 
 }
