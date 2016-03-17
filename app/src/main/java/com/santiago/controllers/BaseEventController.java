@@ -5,8 +5,7 @@ import android.view.View;
 
 import com.santiago.event.Event;
 import com.santiago.event.EventManager;
-import com.santiago.event.listeners.EventListener;
-import com.santiago.event.listeners.EventNotifierListener;
+import com.santiago.event.listener.EventListener;
 
 /**
  * Base controller which implements the sending/receiving of events.
@@ -31,9 +30,9 @@ public abstract class BaseEventController<T extends View> extends BaseController
     //-------------------SETTERS------------------//
 
     /**
-     * Set an EventListener which will broadcast events to the eventmanager.
+     * Set an EventListener which will broadcast events.
      *
-     * @param eventListener used for sending events to the EventManager
+     * @param eventListener used for sending events to the EventManager and the listening classes
      */
     public void setEventListener(EventListener eventListener){
         this.eventListener = eventListener;
@@ -44,34 +43,24 @@ public abstract class BaseEventController<T extends View> extends BaseController
      *  - Broadcast events to the eventmanager and the listening classes.
      *  - Receive and handle other events.
      *
-     *  FOR OTHER VERSION WITH EventManager NOT IMPLEMENTING EventNotifierListener use:
-     *  public <E extends EventManager & EventNotifierListener> void setEventHandlerListener(E e) {
-     *      sameStuffHere;
-     *  }
-     *
      * @param eventManager the EventManager in particular. Must implement EventListener (obviously)
      */
     public void setEventHandlerListener(EventManager eventManager) {
         setEventListener(eventManager);
 
-        if(eventManager!=null && getEventNotifierListener()!=null) {
+        if(eventManager!=null) {
             //avoid duplicates
-            eventManager.removeEventNotifierListener(getEventNotifierListener());
+            eventManager.removeListener(this);
 
-            eventManager.addEventNotifierListener(getEventNotifierListener());
+            eventManager.addListener(this);
         }
     }
 
     //--------------------Handling of events---------------//
 
     /**
-     * Override this method in your extending class to hear the events and handle them
-     * @Note: Avoid recreating instances of an EventNotifierListener in this method since you could start creating duplicates if its called more than once.
-     */
-    protected EventNotifierListener getEventNotifierListener() { return null; }
-
-    /**
-     * Send an event to the EventManager and handle it there
+     * Send an event, process it (optional) in the eventmanager, and
+     * dispatch it to all the listeners
      *
      * @param event
      */

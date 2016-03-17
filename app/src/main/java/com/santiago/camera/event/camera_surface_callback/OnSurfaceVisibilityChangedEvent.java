@@ -1,13 +1,11 @@
 package com.santiago.camera.event.camera_surface_callback;
 
 import com.santiago.event.Event;
-import com.santiago.event.listeners.EventHandler;
-import com.santiago.event.listeners.EventNotifierListener;
 
 /**
  * Created by santiago on 09/03/16.
  */
-public class OnSurfaceVisibilityChangedEvent implements Event {
+public class OnSurfaceVisibilityChangedEvent extends Event {
 
     private boolean visibility = false;
 
@@ -15,13 +13,8 @@ public class OnSurfaceVisibilityChangedEvent implements Event {
         this.visibility = visibility;
     }
 
-    @Override
-    public boolean handle(EventHandler handler) {
-        return false;
+    public boolean isSurfaceVisible() {
+        return visibility;
     }
 
-    @Override
-    public void notify(EventNotifierListener listener) {
-        listener.onSurfaceVisibilityChanged(visibility);
-    }
 }

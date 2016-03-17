@@ -60,7 +60,7 @@ public abstract class BaseController<T extends View> {
      */
     public T getView() {
         return view;
-    }// throws ViewNotAttachedException;
+    } // throws ViewNotAttachedException;
     public void attachView(T t) {
         if(t==null) return;
         onViewAttached(view = t);

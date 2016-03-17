@@ -1,13 +1,11 @@
 package com.santiago.camera.mocks.event;
 
 import com.santiago.event.Event;
-import com.santiago.event.listeners.EventHandler;
-import com.santiago.event.listeners.EventNotifierListener;
 
 /**
  * Created by santiago on 13/03/16.
  */
-public class MockFlashChangedEvent implements Event {
+public class MockFlashChangedEvent extends Event {
 
     private int flashMode;
 
@@ -15,14 +13,7 @@ public class MockFlashChangedEvent implements Event {
         this.flashMode = flashMode;
     }
 
-    @Override
-    public boolean handle(EventHandler handler) {
-        return false;
+    public int getFlashMode() {
+        return flashMode;
     }
-
-    @Override
-    public void notify(EventNotifierListener listener) {
-        listener.mockFlashChange(flashMode);
-    }
-
 }

@@ -13,10 +13,12 @@ import com.santiago.camera.camera.utils.picture.ExifReader;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 import com.santiago.camera.event.camera.OnCameraModifiedEvent;
+import com.santiago.camera.event.camera_surface_callback.OnSurfaceCreatedEvent;
+import com.santiago.camera.event.camera_surface_callback.OnSurfaceVisibilityChangedEvent;
 import com.santiago.camera.manager.CameraManager;
 import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
-import com.santiago.event.listeners.EventNotifierListener;
+import com.santiago.event.anotation.EventMethod;
 
 import java.io.IOException;
 
@@ -33,8 +35,6 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     private CameraManager cameraManager;
 
     private boolean surfaceActive = false;
-
-    private EventNotifierListener eventNotifierListener;
 
     private Camera camera;
 
@@ -69,31 +69,6 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         super.setEventHandlerListener(eventManager);
 
         cameraSurfaceHandler.setEventHandler(eventManager);
-    }
-
-    @Override
-    protected EventNotifierListener getEventNotifierListener() {
-        if (eventNotifierListener == null) {
-            eventNotifierListener = new EventNotifierListener() {
-
-                @Override
-                public void onCameraSurfaceCreated() {
-                    startCamera();
-                }
-
-                @Override
-                public void onSurfaceVisibilityChanged(boolean visibility) {
-                    surfaceActive = visibility;
-                }
-
-                @Override
-                public void onCameraModified() {
-                    cameraSurfaceHandler.setCamera(camera);
-                }
-            };
-        }
-
-        return eventNotifierListener;
     }
 
     /*----------------------Getters & Setters-------------------------*/
@@ -143,9 +118,20 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         });
     }
 
+    @EventMethod(OnSurfaceVisibilityChangedEvent.class)
+    private void onSurfaceVisibilityChanged(OnSurfaceVisibilityChangedEvent event) {
+        surfaceActive = event.isSurfaceVisible();
+    }
+
+    @EventMethod(OnCameraModifiedEvent.class)
+    private void onCameraModified() {
+        cameraSurfaceHandler.setCamera(camera);
+    }
+
     /**
      * Call for starting the camera
      */
+    @EventMethod(OnSurfaceCreatedEvent.class)
     public void startCamera() {
         //Hide the picture if its visible
         getView().onPictureVisibilityChanged(View.GONE);
