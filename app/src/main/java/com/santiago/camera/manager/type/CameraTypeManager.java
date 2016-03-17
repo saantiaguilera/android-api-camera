@@ -26,8 +26,8 @@ public class CameraTypeManager {
 
     public void setCamera(CameraType camera) {
         if (camera == CameraType.FRONT)
-            currentCamera = getBackCamera();
-        else currentCamera = getFrontCamera();
+            currentCamera = getFrontCamera();
+        else currentCamera = getBackCamera();
 
         eventManager.broadcastEvent(new OnCameraTypeChangeEvent(currentCamera));
     }
