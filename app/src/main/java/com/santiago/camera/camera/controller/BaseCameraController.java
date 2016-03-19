@@ -166,7 +166,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      * @param parameters
      * @return Camera.Size or null for skipping it
      */
-    public abstract Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters);
+    protected abstract Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters);
 
     protected abstract void onPictureGenerated(Bitmap bitmap);
 

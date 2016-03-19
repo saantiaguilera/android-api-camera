@@ -16,7 +16,7 @@ import com.santiago.event.anotation.EventMethod;
  */
 public class MockSwitchCameraController extends BaseEventController<ImageView> {
 
-    private CameraType cameraMode = CameraType.FRONT;
+    private CameraType cameraMode = CameraType.BACK;
 
     public MockSwitchCameraController(Context context) {
         this(context, null);
@@ -31,12 +31,16 @@ public class MockSwitchCameraController extends BaseEventController<ImageView> {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onShootClicked();
+                onSwitchClick();
             }
         });
     }
 
-    private void onShootClicked() {
+    public void setDefaultCameraMode(CameraType cameraType) {
+        this.cameraMode = cameraType;
+    }
+
+    private void onSwitchClick() {
         if(cameraMode == CameraType.FRONT) {
             cameraMode = CameraType.BACK;
         } else {

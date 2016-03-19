@@ -44,6 +44,7 @@ public class MockActivity extends Activity {
         shootController.setEventHandlerListener(eventManager);
         switchCameraController.setEventHandlerListener(eventManager);
 
+        switchCameraController.setDefaultCameraMode(cameraController.getCameraManager().getCameraTypeManager().getCurrentCamera());
     }
 
     @Override

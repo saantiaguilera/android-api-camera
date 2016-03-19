@@ -79,7 +79,7 @@ public class MockCameraController extends BaseCameraController<BaseCameraView> {
     }
 
     @Override
-    public Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
+    protected Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
         final double ASPECT_TOLERANCE = 0.1;
         double targetRatio=(double) height / width;
 
