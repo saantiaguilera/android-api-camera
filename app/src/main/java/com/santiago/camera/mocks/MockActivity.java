@@ -10,11 +10,11 @@ import com.santiago.camera.R;
 import com.santiago.camera.camera.controller.BaseCameraController;
 import com.santiago.camera.camera.view.BaseCameraView;
 import com.santiago.camera.camera.view.SquaredCameraView;
-import com.santiago.camera.mocks.controller.MockCameraController;
-import com.santiago.camera.mocks.controller.MockFlashController;
-import com.santiago.camera.mocks.controller.MockShootController;
-import com.santiago.camera.mocks.controller.MockSquaredCameraController;
-import com.santiago.camera.mocks.controller.MockSwitchCameraController;
+import com.santiago.camera.mocks.controller.camera.MockCameraController;
+import com.santiago.camera.mocks.controller.camera.MockSquaredCameraController;
+import com.santiago.camera.mocks.controller.configs.MockFlashController;
+import com.santiago.camera.mocks.controller.configs.MockShootController;
+import com.santiago.camera.mocks.controller.configs.MockSwitchCameraController;
 import com.santiago.event.EventManager;
 
 /**

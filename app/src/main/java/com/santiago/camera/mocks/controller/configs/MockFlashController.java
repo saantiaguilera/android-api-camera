@@ -1,4 +1,4 @@
-package com.santiago.camera.mocks.controller;
+package com.santiago.camera.mocks.controller.configs;
 
 import android.content.Context;
 import android.view.View;
