@@ -8,42 +8,39 @@ import android.support.annotation.NonNull;
  */
 public class PictureCropper {
 
-    public enum CROP_MODE { NONE, SQUARED }
+    public static final int ASPECT_RATIO_UNDEFINED = -1;
 
     //If w>h TOP==LEFT && BOTTOM==RIGHT
     public enum CROP_GRAVITY { TOP, CENTER, BOTTOM, LEFT, RIGHT }
 
-    public static Bitmap crop(@NonNull Bitmap source, @NonNull CROP_MODE mode) {
-        return crop(source, mode, CROP_GRAVITY.TOP);
+    public static Bitmap crop(@NonNull Bitmap source, float aspectRatio) {
+        return crop(source, aspectRatio, CROP_GRAVITY.TOP);
     }
 
-    public static Bitmap crop(@NonNull Bitmap source, @NonNull CROP_MODE mode, @NonNull CROP_GRAVITY gravity) {
+    public static Bitmap crop(@NonNull Bitmap source, float aspectRatio, @NonNull CROP_GRAVITY gravity) {
+        if(aspectRatio == ASPECT_RATIO_UNDEFINED)
+            return source;
 
-        switch(mode) {
-            case SQUARED:
-                switch (gravity) {
-                    case CENTER:
-                        if (source.getWidth() >= source.getHeight())
-                            return Bitmap.createBitmap(source, source.getWidth()/2 - source.getHeight()/2, 0, source.getHeight(), source.getHeight());
-                        else return Bitmap.createBitmap(source, 0, source.getHeight()/2 - source.getWidth()/2, source.getWidth(), source.getWidth());
+        switch (gravity) {
+            case CENTER:
+                if (source.getWidth() >= source.getHeight())
+                    return Bitmap.createBitmap(source, (int) ((source.getWidth() - source.getHeight()) / (2 * aspectRatio)), 0, (int) (source.getHeight() * aspectRatio), (int) (source.getHeight() * aspectRatio));
+                else return Bitmap.createBitmap(source, 0, (int) ((source.getHeight() - source.getWidth()) / (2 * aspectRatio)), (int) (source.getWidth() * aspectRatio), (int) (source.getWidth() * aspectRatio));
 
-                    case LEFT:
-                    case TOP:
-                        if (source.getWidth() >= source.getHeight())
-                            return Bitmap.createBitmap(source, 0, 0, source.getHeight(), source.getHeight());
-                        else return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getWidth());
+            case LEFT:
+            case TOP:
+                if (source.getWidth() >= source.getHeight())
+                    return Bitmap.createBitmap(source, 0, 0, (int) (source.getHeight() * aspectRatio), (int) (source.getHeight() * aspectRatio));
+                else return Bitmap.createBitmap(source, 0, 0, (int) (source.getWidth() * aspectRatio), (int) (source.getWidth() * aspectRatio));
 
-                    case BOTTOM:
-                    case RIGHT:
-                        if (source.getWidth() >= source.getHeight())
-                            return Bitmap.createBitmap(source, source.getWidth() - source.getHeight(), 0, source.getHeight(), source.getHeight());
-                        else return Bitmap.createBitmap(source, 0, source.getHeight() - source.getWidth(), source.getWidth(), source.getWidth());
-                }
-
-            case NONE:
-            default:
-                return source;
+            case BOTTOM:
+            case RIGHT:
+                if (source.getWidth() >= source.getHeight())
+                    return Bitmap.createBitmap(source, (int) ((source.getWidth() - source.getHeight()) / (2 * aspectRatio)), 0, (int) (source.getHeight() * aspectRatio), (int) (source.getHeight() * aspectRatio));
+                else return Bitmap.createBitmap(source, 0, (int) ((source.getHeight() - source.getWidth()) / (2 * aspectRatio)), (int) (source.getWidth() * aspectRatio), (int) (source.getWidth() * aspectRatio));
         }
+
+        return source;
     }
 
 }

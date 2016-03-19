@@ -61,7 +61,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     /*----------------------Getters & Setters-------------------------*/
 
-    public @NonNull  CameraManager getCameraManager() {
+    public @NonNull CameraManager getCameraManager() {
         return cameraManager;
     }
 
@@ -120,7 +120,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 stopCamera();
 
                 //Crop it if necessary
-                bitmap = PictureCropper.crop(bitmap, getCropMode(), getCropGravity());
+                if(getCropGravity()==null)
+                    bitmap = PictureCropper.crop(bitmap, getPictureAspectRatio());
+                else bitmap = PictureCropper.crop(bitmap, getPictureAspectRatio(), getCropGravity());
 
                 //Notify
                 onPictureGenerated(bitmap);
@@ -172,19 +174,19 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     /*------------------------Overrideable methods------------------------*/
 
     /**
-     * If we should crop the image before processing it, override this method
-     * @return
+     * If the camera is not using match match, and has a defined aspect ratio, override this method
      */
-    protected @NonNull PictureCropper.CROP_MODE getCropMode() {
-        return PictureCropper.CROP_MODE.NONE;
+    protected float getPictureAspectRatio() {
+        return PictureCropper.ASPECT_RATIO_UNDEFINED;
     }
 
     /**
-     * If we should crop the image, and use a gravity before processing it, override this method
-     * @return
+     * If the camera is not using match match, and has a defined aspect ratio
+     * we can crop the image in different ways (like centered, from top, etc)
+     * Override this method to decide it
      */
-    protected @NonNull PictureCropper.CROP_GRAVITY getCropGravity() {
-        return PictureCropper.CROP_GRAVITY.CENTER;
+    protected PictureCropper.CROP_GRAVITY getCropGravity() {
+        return null;
     }
 
     /*----------------------Surface Callback Class------------------------*/

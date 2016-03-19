@@ -21,6 +21,7 @@ import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
  */
 public class SquaredCameraView extends FrameLayout implements CameraSurfaceHolder, CameraPictureCallback {
 
+    //Since camera.size parameters dont have 1:1 ratio, closest we can get is 4:3. Define the surface and everything with it, and hide the overflow
     private static final double BEST_RATIO_TOLERANCE = 4 / 3d;
 
     private SurfaceView surfaceView;

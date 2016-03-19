@@ -3,7 +3,6 @@ package com.santiago.camera.mocks.controller.camera;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
-import android.support.annotation.NonNull;
 
 import com.santiago.camera.R;
 import com.santiago.camera.camera.controller.BaseCameraController;
@@ -61,16 +60,14 @@ public class MockSquaredCameraController extends BaseCameraController<SquaredCam
         broadcastEvent(new MockOnPictureTakenEvent(bitmap));
     }
 
-    @NonNull
     @Override
     protected PictureCropper.CROP_GRAVITY getCropGravity() {
         return PictureCropper.CROP_GRAVITY.TOP;
     }
 
-    @NonNull
     @Override
-    protected PictureCropper.CROP_MODE getCropMode() {
-        return PictureCropper.CROP_MODE.SQUARED;
+    protected float getPictureAspectRatio() {
+        return 1;
     }
 
     @EventMethod(MockFlashChangedEvent.class)
