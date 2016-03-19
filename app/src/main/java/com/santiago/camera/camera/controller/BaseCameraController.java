@@ -265,9 +265,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
          * @note <strong>width its the height and height its the width, since physical camera
          * is installed in landscape mode (this means, x is y and y is x.</strong>
          *
-         * @note We could (im really doubting it, but its worth a try) compare when we are in preview sizes and check if
+         * @note TODO We could (im really doubting it, but its worth a try) compare when we are in preview sizes and check if
          * the aspect ratio exists in the picture sizes. If it does we continue the operation if not we dont use that size
-         * That way we can be sure that our picture and preview will match. 
+         * That way we can be sure that our picture and preview will match.
          *
          * @param width
          * @param height
