@@ -16,15 +16,17 @@ import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Controller for a really basic camera
  *
  * Created by santiago on 09/03/16.
  */
-public abstract class BaseCameraController<T extends View & CameraSurfaceHolder & CameraPictureCallback> extends BaseEventController<T> implements SurfaceHolder.Callback {
+public abstract class BaseCameraController<T extends View & CameraSurfaceHolder & CameraPictureCallback> extends BaseEventController<T> {
 
     private SurfaceHolder surfaceHolder;
+    private BaseCameraSurfaceCallback surfaceCallback;
 
     private CameraManager cameraManager;
 
@@ -52,7 +54,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         setEventHandlerListener(new EventManager(getContext()));
 
         //As soon as we are setting him a callback, process will start and we will eventually be notified (in the cameraSurfaceHandler class about its creation)
-        surfaceHolder.addCallback(this);
+        surfaceHolder.addCallback(surfaceCallback = new BaseCameraSurfaceCallback());
     }
 
     /*----------------------Getters & Setters-------------------------*/
@@ -77,6 +79,8 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         try {
             //Since the surface is created, set the camera in it
             camera.setPreviewDisplay(surfaceHolder);
+
+            surfaceCallback.refreshSurface();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,14 +100,14 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-                boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType()==Camera.CameraInfo.CAMERA_FACING_FRONT;
+                boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT;
                 CameraOrientationManager orientationManager = cameraManager.getCameraOrientationManager();
 
                 int rotation = CameraPictureUtilities.getRotation(orientationManager.getDisplayOrientation(), orientationManager.getNormalOrientation(), orientationManager.getLayoutOrientation(), isFrontCamera);
 
                 bitmap = CameraPictureUtilities.rotatePicture(getContext(), rotation, bitmap);
 
-                if(isFrontCamera)
+                if (isFrontCamera)
                     bitmap = CameraPictureUtilities.mirrorImage(bitmap);
 
                 //Set the picture
@@ -156,59 +160,113 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         surfaceActive = false;
     }
 
-    /*--------------------Abstracty methods---------------------------*/
-
-    /**
-     * Adapt to your particular camera (if you need a square preview or a specific one)
-     * and return the sizes you want the preview to be
-     * @param width
-     * @param height
-     * @param parameters
-     * @return Camera.Size or null for skipping it
-     */
-    protected abstract Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters);
+    /*-------------------------Abstracty methods---------------------------*/
 
     protected abstract void onPictureGenerated(Bitmap bitmap);
 
-    /*----------------------Surface Callbacks------------------------*/
+    /*----------------------Surface Callback Class------------------------*/
 
-    /**
-     * Called when the surface has being created
-     * @param holder
-     */
-    public void surfaceCreated(SurfaceHolder holder) {
-        //Start the camera when the surface is created
-        startCamera();
-    }
+    private class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
 
-    /**
-     * Called when the surface suffers some change (rotation, picture taken, etc)
-     * @param holder
-     * @param format
-     * @param width
-     * @param height
-     */
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if(camera==null)
-            return;
+        private int width = -1;
+        private int height = -1;
 
-        //Data will be using
-        Camera.Parameters parameters = camera.getParameters();
-        Camera.Size size;
+        public BaseCameraSurfaceCallback() {
 
-        //Notify them about what size they want us to use
-        size = getBestPreviewSize(width, height, parameters);
+        }
 
-        //If size has being set, apply it to our camera and broadcast a change of visibility
-        if (size != null) {
-            parameters.setPreviewSize(size.width, size.height);
+        /**
+         * Called when the surface has being created
+         * @param holder
+         */
+        public void surfaceCreated(SurfaceHolder holder) {
+            //Start the camera when the surface is created
+            startCamera();
+        }
+
+        /**
+         * Called when the surface suffers some change (rotation, picture taken, etc)
+         * @param holder
+         * @param format
+         * @param width
+         * @param height
+         */
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if(camera==null)
+                return;
+
+            this.width = width;
+            this.height = height;
+
+            refreshSurface();
+        }
+
+        public void surfaceDestroyed(SurfaceHolder holder) { }
+
+        protected void refreshSurface() {
+            if(width==-1 && height==-1)
+                return;
+
+            //Data will be using
+            Camera.Parameters parameters = camera.getParameters();
+            Camera.Size previewSize;
+            Camera.Size pictureSize;
+
+            //Get the best size for this surface and set  it
+            previewSize = getBestPictureSize(width, height, parameters.getSupportedPreviewSizes());
+            if(previewSize!=null)
+                parameters.setPreviewSize(previewSize.width, previewSize.height);
+
+            //Get the best picture size for this surface and set it
+            pictureSize = getBestPictureSize(width, height, parameters.getSupportedPictureSizes());
+            if(pictureSize!=null)
+                parameters.setPictureSize(pictureSize.width, pictureSize.height);
+
+            //Update data
             camera.setParameters(parameters);
             camera.startPreview();
 
             surfaceActive = true;
         }
-    }
 
-    public void surfaceDestroyed(SurfaceHolder holder) { }
+        private Camera.Size getBestPictureSize(int width, int height, List<Camera.Size> sizes) {
+            if (sizes == null)
+                return null;
+
+            final double ASPECT_TOLERANCE = 0.1;
+            double targetRatio=(double) height / width;
+
+            Camera.Size optimalSize = null;
+            double minDiff = Double.MAX_VALUE;
+
+            int targetHeight = height;
+
+            for (Camera.Size size : sizes) {
+                double ratio = (double) size.width / size.height;
+
+                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                    continue;
+
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+
+            if (optimalSize == null) {
+                minDiff = Double.MAX_VALUE;
+
+                for (Camera.Size size : sizes) {
+                    if (Math.abs(size.height - targetHeight) < minDiff) {
+                        optimalSize = size;
+                        minDiff = Math.abs(size.height - targetHeight);
+                    }
+                }
+            }
+
+            return optimalSize;
+        }
+
+    }
 
 }
