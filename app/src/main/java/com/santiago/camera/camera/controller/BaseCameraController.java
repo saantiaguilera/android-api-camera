@@ -168,11 +168,13 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     private class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
 
-        private int width = -1;
-        private int height = -1;
+        private static final double ASPECT_RATIO_TOLERANCE = 0.05d;
+        private static final int NO_VALUE = -1;
+
+        private int width = NO_VALUE;
+        private int height = NO_VALUE;
 
         public BaseCameraSurfaceCallback() {
-
         }
 
         /**
@@ -204,7 +206,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         public void surfaceDestroyed(SurfaceHolder holder) { }
 
         protected void refreshSurface() {
-            if(width==-1 && height==-1)
+            if(width==NO_VALUE && height==NO_VALUE)
                 return;
 
             //Data will be using
@@ -212,15 +214,16 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             Camera.Size previewSize;
             Camera.Size pictureSize;
 
-            //Get the best size for this surface and set  it
+            //Get the best size for this surface and if exists, set it and calculate the one for the picture (with the ratio setted for the preview)
             previewSize = getBestPictureSize(width, height, parameters.getSupportedPreviewSizes());
-            if(previewSize!=null)
+            if(previewSize!=null) {
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
 
-            //Get the best picture size for this surface and set it
-            pictureSize = getBestPictureSize(width, height, parameters.getSupportedPictureSizes());
-            if(pictureSize!=null)
-                parameters.setPictureSize(pictureSize.width, pictureSize.height);
+                //Get the best picture size for this surface and set it
+                pictureSize = getBestPictureSize(previewSize.width, previewSize.height, parameters.getSupportedPictureSizes());
+                if (pictureSize != null)
+                    parameters.setPictureSize(pictureSize.width, pictureSize.height);
+            }
 
             //Update data
             camera.setParameters(parameters);
@@ -233,23 +236,20 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             if (sizes == null)
                 return null;
 
-            final double ASPECT_TOLERANCE = 0.1;
             double targetRatio=(double) height / width;
 
             Camera.Size optimalSize = null;
             double minDiff = Double.MAX_VALUE;
 
-            int targetHeight = height;
-
             for (Camera.Size size : sizes) {
                 double ratio = (double) size.width / size.height;
 
-                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                if (Math.abs(ratio - targetRatio) > ASPECT_RATIO_TOLERANCE)
                     continue;
 
-                if (Math.abs(size.height - targetHeight) < minDiff) {
+                if (Math.abs((size.height/size.width) - (height/width)) < minDiff) {
                     optimalSize = size;
-                    minDiff = Math.abs(size.height - targetHeight);
+                    minDiff = Math.abs((size.height/size.width) - (height/width));
                 }
             }
 
@@ -257,9 +257,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 minDiff = Double.MAX_VALUE;
 
                 for (Camera.Size size : sizes) {
-                    if (Math.abs(size.height - targetHeight) < minDiff) {
+                    if (Math.abs((size.height/size.width) - (height/width)) < minDiff) {
                         optimalSize = size;
-                        minDiff = Math.abs(size.height - targetHeight);
+                        minDiff = Math.abs((size.height/size.width) - (height/width));
                     }
                 }
             }
