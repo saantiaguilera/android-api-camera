@@ -183,7 +183,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      * If we should crop the image, and use a gravity before processing it, override this method
      * @return
      */
-    protected @NonNull  PictureCropper.CROP_GRAVITY getCropGravity() {
+    protected @NonNull PictureCropper.CROP_GRAVITY getCropGravity() {
         return PictureCropper.CROP_GRAVITY.CENTER;
     }
 

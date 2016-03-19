@@ -6,4 +6,5 @@
 
     <color name="mock_transparent">#00000000</color>
     <color name="mock_black">#000000</color>
+    <color name="mock_white">#ffffff</color>
 </resources>
