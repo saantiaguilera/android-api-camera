@@ -193,6 +193,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     private class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
 
+        private static final double ASPECT_TOLERANCE = 0.05D;
         private static final int NO_VALUE = -1;
 
         private int width = NO_VALUE;
@@ -246,7 +247,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
 
                 //Get the best picture size for this surface, in relation with the setted preview size and set it
-                pictureSize = getBestPictureSize(previewSize.width, previewSize.height, parameters.getSupportedPictureSizes());
+                pictureSize = getBestPictureSize(previewSize.height, previewSize.width, parameters.getSupportedPictureSizes());
                 if (pictureSize != null)
                     parameters.setPictureSize(pictureSize.width, pictureSize.height);
             }
@@ -264,6 +265,10 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
          * @note <strong>width its the height and height its the width, since physical camera
          * is installed in landscape mode (this means, x is y and y is x.</strong>
          *
+         * @note We could (im really doubting it, but its worth a try) compare when we are in preview sizes and check if
+         * the aspect ratio exists in the picture sizes. If it does we continue the operation if not we dont use that size
+         * That way we can be sure that our picture and preview will match. 
+         *
          * @param width
          * @param height
          * @param sizes
@@ -273,8 +278,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             if (sizes == null)
                 return null;
 
-            final double ASPECT_TOLERANCE = 0.1;
-            double targetRatio=(double) height / width;
+            double targetRatio = (double) height / width;
 
             Camera.Size optimalSize = null;
             double minDiff = Double.MAX_VALUE;
