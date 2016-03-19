@@ -168,7 +168,6 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     private class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
 
-        private static final double ASPECT_RATIO_TOLERANCE = 0.05d;
         private static final int NO_VALUE = -1;
 
         private int width = NO_VALUE;
@@ -197,6 +196,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             if(camera==null)
                 return;
 
+            //Refresh our internal values to keep track of them in case we refresh the surface (when the camera suffers changes)
             this.width = width;
             this.height = height;
 
@@ -206,6 +206,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         public void surfaceDestroyed(SurfaceHolder holder) { }
 
         protected void refreshSurface() {
+            //If we dont track of the width/height of our surface, we cant do this operation
             if(width==NO_VALUE && height==NO_VALUE)
                 return;
 
@@ -219,7 +220,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             if(previewSize!=null) {
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
 
-                //Get the best picture size for this surface and set it
+                //Get the best picture size for this surface, in relation with the setted preview size and set it
                 pictureSize = getBestPictureSize(previewSize.width, previewSize.height, parameters.getSupportedPictureSizes());
                 if (pictureSize != null)
                     parameters.setPictureSize(pictureSize.width, pictureSize.height);
@@ -232,35 +233,45 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             surfaceActive = true;
         }
 
+        /**
+         * Get the best size resembling the provided aspect ratio from the list of sizes
+         *
+         * @note <strong>width its the height and height its the width, since physical camera
+         * is installed in landscape mode (this means, x is y and y is x.</strong>
+         *
+         * @param width
+         * @param height
+         * @param sizes
+         * @return Best Size that fits the given parameters
+         */
         private Camera.Size getBestPictureSize(int width, int height, List<Camera.Size> sizes) {
             if (sizes == null)
                 return null;
 
-            double targetRatio=(double) height / width;
+            //Get the ratio we want to achieve (read as width / height)
+            double targetRatio= (double) height / width;
 
+            //Init data
             Camera.Size optimalSize = null;
-            double minDiff = Double.MAX_VALUE;
+            double minRatioTolerance = Double.MAX_VALUE;
+            //double minHeightTolerance = (double) height;
 
+            /**
+             * Iterate through all our available sizes, get the ratio of each and compare them  with our ratio.
+             * If its lower than our minimal difference achieved by now (initially its the highest value possible, so first value will enter yes or yes)
+             * change the current optimal one and update the minimal difference.
+             *
+             * @note Im forcing size.width (the height) to be higher than the surface height, this way we prevent the picture to be of 144px or those really little
+             * sizes. On the other hand we could also try to get the max height possible that also respects the lower ratio, but problem is that if the first size is
+             * eg REALLY high and with a shit ratio, all the others wont enter since our heightTolerance is damn high in comparison to others. so I just opted for the first way
+             */
             for (Camera.Size size : sizes) {
-                double ratio = (double) size.width / size.height;
+                double ratioSpectre = Math.abs(((double) size.width / size.height) - targetRatio);
 
-                if (Math.abs(ratio - targetRatio) > ASPECT_RATIO_TOLERANCE)
-                    continue;
-
-                if (Math.abs((size.height/size.width) - (height/width)) < minDiff) {
+                if (ratioSpectre < minRatioTolerance && size.height > width) { //size.width > minHeightTolerance
                     optimalSize = size;
-                    minDiff = Math.abs((size.height/size.width) - (height/width));
-                }
-            }
-
-            if (optimalSize == null) {
-                minDiff = Double.MAX_VALUE;
-
-                for (Camera.Size size : sizes) {
-                    if (Math.abs((size.height/size.width) - (height/width)) < minDiff) {
-                        optimalSize = size;
-                        minDiff = Math.abs((size.height/size.width) - (height/width));
-                    }
+                    minRatioTolerance = ratioSpectre;
+                    //minHeightTolerance = size.width;
                 }
             }
 
