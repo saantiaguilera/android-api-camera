@@ -9,16 +9,11 @@ import android.view.View;
 
 import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
 import com.santiago.camera.camera.utils.picture.CameraPictureUtilities;
-import com.santiago.camera.camera.utils.surface.CameraSurfaceHandler;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
-import com.santiago.camera.event.camera.OnCameraModifiedEvent;
-import com.santiago.camera.event.camera.surface_callback.OnSurfaceCreatedEvent;
-import com.santiago.camera.event.camera.surface_callback.OnSurfaceVisibilityChangedEvent;
 import com.santiago.camera.manager.CameraManager;
 import com.santiago.camera.manager.orientation.CameraOrientationManager;
 import com.santiago.controllers.BaseEventController;
 import com.santiago.event.EventManager;
-import com.santiago.event.anotation.EventMethod;
 
 import java.io.IOException;
 
@@ -27,10 +22,9 @@ import java.io.IOException;
  *
  * Created by santiago on 09/03/16.
  */
-public abstract class BaseCameraController<T extends View & CameraSurfaceHolder & CameraPictureCallback> extends BaseEventController<T> implements CameraSurfaceHandler.CameraSurfaceCallbackListener {
+public abstract class BaseCameraController<T extends View & CameraSurfaceHolder & CameraPictureCallback> extends BaseEventController<T> implements SurfaceHolder.Callback {
 
     private SurfaceHolder surfaceHolder;
-    private CameraSurfaceHandler cameraSurfaceHandler;
 
     private CameraManager cameraManager;
 
@@ -54,21 +48,11 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     protected void onViewAttached(T t) {
         surfaceHolder = t.getSurfaceHolder();
 
-        cameraSurfaceHandler = new CameraSurfaceHandler(camera);
-        cameraSurfaceHandler.setListener(this);
-
         //In case they dont set us an EventHandler, we do it on our own because we will need to broadcast things internally. If they do then dont mind this
         setEventHandlerListener(new EventManager(getContext()));
 
         //As soon as we are setting him a callback, process will start and we will eventually be notified (in the cameraSurfaceHandler class about its creation)
-        surfaceHolder.addCallback(cameraSurfaceHandler);
-    }
-
-    @Override
-    public void setEventHandlerListener(EventManager eventManager) {
-        super.setEventHandlerListener(eventManager);
-
-        cameraSurfaceHandler.setEventHandler(eventManager);
+        surfaceHolder.addCallback(this);
     }
 
     /*----------------------Getters & Setters-------------------------*/
@@ -135,20 +119,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         });
     }
 
-    @EventMethod(OnSurfaceVisibilityChangedEvent.class)
-    private void onSurfaceVisibilityChanged(OnSurfaceVisibilityChangedEvent event) {
-        surfaceActive = event.isSurfaceVisible();
-    }
-
-    @EventMethod(OnCameraModifiedEvent.class)
-    private void onCameraModified() {
-        cameraSurfaceHandler.setCamera(camera);
-    }
-
     /**
      * Call for starting the camera
      */
-    @EventMethod(OnSurfaceCreatedEvent.class)
     public void startCamera() {
         //Hide the picture if its visible
         getView().onPictureVisibilityChanged(View.GONE);
@@ -161,9 +134,6 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
         //Set the preview display again
         setPreviewDisplay();
-
-        //Notify to the people listening that our camera has suffer modifications
-        notifyCameraChanged();
 
         camera.startPreview();
     }
@@ -183,18 +153,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
         camera.release();
         camera = null;
 
-        notifyCameraChanged();
-
         surfaceActive = false;
-    }
-
-    /**
-     * Call it everytime the camera suffers a change to make the people interact with the modifications
-     *
-     * Pretty much like the BaseAdapter notifyDataSetChanged() thing
-     */
-    public void notifyCameraChanged() {
-        broadcastEvent(new OnCameraModifiedEvent());
     }
 
     /*--------------------Abstracty methods---------------------------*/
@@ -207,9 +166,49 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      * @param parameters
      * @return Camera.Size or null for skipping it
      */
-    @Override
     public abstract Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters);
 
     protected abstract void onPictureGenerated(Bitmap bitmap);
+
+    /*----------------------Surface Callbacks------------------------*/
+
+    /**
+     * Called when the surface has being created
+     * @param holder
+     */
+    public void surfaceCreated(SurfaceHolder holder) {
+        //Start the camera when the surface is created
+        startCamera();
+    }
+
+    /**
+     * Called when the surface suffers some change (rotation, picture taken, etc)
+     * @param holder
+     * @param format
+     * @param width
+     * @param height
+     */
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        if(camera==null)
+            return;
+
+        //Data will be using
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size size;
+
+        //Notify them about what size they want us to use
+        size = getBestPreviewSize(width, height, parameters);
+
+        //If size has being set, apply it to our camera and broadcast a change of visibility
+        if (size != null) {
+            parameters.setPreviewSize(size.width, size.height);
+            camera.setParameters(parameters);
+            camera.startPreview();
+
+            surfaceActive = true;
+        }
+    }
+
+    public void surfaceDestroyed(SurfaceHolder holder) { }
 
 }
