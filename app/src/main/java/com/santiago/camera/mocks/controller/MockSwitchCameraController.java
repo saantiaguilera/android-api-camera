@@ -41,11 +41,7 @@ public class MockSwitchCameraController extends BaseEventController<ImageView> {
     }
 
     private void onSwitchClick() {
-        if(cameraMode == CameraType.FRONT) {
-            cameraMode = CameraType.BACK;
-        } else {
-            cameraMode = CameraType.FRONT;
-        }
+        cameraMode = (cameraMode == CameraType.FRONT) ? CameraType.BACK : CameraType.FRONT;
 
         broadcastEvent(new MockSwitchCameraChangedEvent(cameraMode));
     }
