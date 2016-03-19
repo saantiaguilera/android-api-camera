@@ -271,30 +271,32 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             if (sizes == null)
                 return null;
 
-            //Get the ratio we want to achieve (read as width / height)
-            double targetRatio= (double) height / width;
+            final double ASPECT_TOLERANCE = 0.1;
+            double targetRatio=(double) height / width;
 
-            //Init data
             Camera.Size optimalSize = null;
-            double minRatioTolerance = Double.MAX_VALUE;
-            //double minHeightTolerance = (double) height;
+            double minDiff = Double.MAX_VALUE;
 
-            /**
-             * Iterate through all our available sizes, get the ratio of each and compare them  with our ratio.
-             * If its lower than our minimal difference achieved by now (initially its the highest value possible, so first value will enter yes or yes)
-             * change the current optimal one and update the minimal difference.
-             *
-             * @note Im forcing size.width (the height) to be higher than the surface height, this way we prevent the picture to be of 144px or those really little
-             * sizes. On the other hand we could also try to get the max height possible that also respects the lower ratio, but problem is that if the first size is
-             * eg REALLY high and with a shit ratio, all the others wont enter since our heightTolerance is damn high in comparison to others. so I just opted for the first way
-             */
             for (Camera.Size size : sizes) {
-                double ratioSpectre = Math.abs(((double) size.width / size.height) - targetRatio);
+                double ratio = (double) size.width / size.height;
 
-                if (ratioSpectre < minRatioTolerance && size.height > width) { //size.width > minHeightTolerance
+                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                    continue;
+
+                if (Math.abs(size.height - height) < minDiff) {
                     optimalSize = size;
-                    minRatioTolerance = ratioSpectre;
-                    //minHeightTolerance = size.width;
+                    minDiff = Math.abs(size.height - height);
+                }
+            }
+
+            if (optimalSize == null) {
+                minDiff = Double.MAX_VALUE;
+
+                for (Camera.Size size : sizes) {
+                    if (Math.abs(size.height - height) < minDiff) {
+                        optimalSize = size;
+                        minDiff = Math.abs(size.height - height);
+                    }
                 }
             }
 
