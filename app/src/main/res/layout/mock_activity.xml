@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.santiago.camera.camera.view.BaseCameraView
-        android:id="@+id/activity_mock_base_camera_view"
+    <com.santiago.camera.camera.view.SquaredCameraView
+        android:id="@+id/activity_mock_camera_view"
 
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -49,5 +49,27 @@
             android:src="@drawable/mock_switch_camera"/>
 
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/testing_container"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:background="@color/mock_black"
+
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/testing"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:adjustViewBounds="true"
+
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
 
 </FrameLayout>

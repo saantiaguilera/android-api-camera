@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.support.annotation.NonNull;
 import android.view.SurfaceHolder;
 import android.view.View;
 
 import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
 import com.santiago.camera.camera.utils.picture.CameraPictureUtilities;
+import com.santiago.camera.camera.utils.picture.PictureCropper;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 import com.santiago.camera.manager.CameraManager;
 import com.santiago.camera.manager.orientation.CameraOrientationManager;
@@ -59,7 +61,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     /*----------------------Getters & Setters-------------------------*/
 
-    public CameraManager getCameraManager() {
+    public @NonNull  CameraManager getCameraManager() {
         return cameraManager;
     }
 
@@ -117,6 +119,9 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
 
+                //Crop it if necessary
+                bitmap = PictureCropper.crop(bitmap, getCropMode(), getCropGravity());
+
                 //Notify
                 onPictureGenerated(bitmap);
             }
@@ -163,6 +168,24 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     /*-------------------------Abstracty methods---------------------------*/
 
     protected abstract void onPictureGenerated(Bitmap bitmap);
+
+    /*------------------------Overrideable methods------------------------*/
+
+    /**
+     * If we should crop the image before processing it, override this method
+     * @return
+     */
+    protected @NonNull PictureCropper.CROP_MODE getCropMode() {
+        return PictureCropper.CROP_MODE.NONE;
+    }
+
+    /**
+     * If we should crop the image, and use a gravity before processing it, override this method
+     * @return
+     */
+    protected @NonNull  PictureCropper.CROP_GRAVITY getCropGravity() {
+        return PictureCropper.CROP_GRAVITY.CENTER;
+    }
 
     /*----------------------Surface Callback Class------------------------*/
 

@@ -2,6 +2,7 @@ package com.santiago.camera.camera.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -41,7 +42,7 @@ public class BaseCameraView extends FrameLayout implements CameraSurfaceHolder, 
     }
 
     @Override
-    public void onPictureTaken(Bitmap picture) {
+    public void onPictureTaken(@NonNull Bitmap picture) {
         pictureView.setImageBitmap(picture);
     }
 

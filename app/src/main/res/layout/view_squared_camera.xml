@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <FrameLayout
+        android:id="@+id/mock_view_squared_camera_container"
+
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <android.view.SurfaceView
+            android:id="@+id/view_squared_camera_surface_view"
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"/>
+
+        <ImageView
+            android:id="@+id/view_squared_camera_image_view"
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"/>
+
+        <View
+            android:id="@+id/mock_view_squared_camera_squared_banner_for_hiding_bottom"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+
+            android:background="@color/mock_black" />
+
+    </FrameLayout>
+
+</merge>

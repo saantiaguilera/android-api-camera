@@ -7,10 +7,11 @@ package com.santiago.camera.camera.utils.picture;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.support.annotation.NonNull;
 
 public class CameraPictureUtilities {
 
-    public static Bitmap mirrorImage(Bitmap resultBitmap){
+    public static Bitmap mirrorImage(@NonNull Bitmap resultBitmap){
         Matrix matrix = new Matrix();
         matrix.preScale(-1.0f, 1.0f);
 
@@ -44,7 +45,7 @@ public class CameraPictureUtilities {
         return rotation;
     }
 
-    public static Bitmap rotatePicture(Context context, int rotation, Bitmap bitmap) {
+    public static Bitmap rotatePicture(@NonNull Context context, int rotation, @NonNull Bitmap bitmap) {
         if (rotation != 0) {
             Bitmap oldBitmap = bitmap;
 
