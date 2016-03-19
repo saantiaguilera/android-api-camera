@@ -26,7 +26,8 @@ public class MockActivity extends Activity {
 
     private EventManager eventManager;
 
-    BaseCameraController cameraController;
+    private BaseCameraController cameraController;
+    private CAMERA currentCamera = null;
 
     private MockFlashController flashController;
     private MockShootController shootController;
@@ -44,15 +45,16 @@ public class MockActivity extends Activity {
 
         setContentView(R.layout.mock_activity);
 
+        //Inflate al the stuff we will use
         flashController = new MockFlashController(this, (ImageView) findViewById(R.id.activity_mock_flash_button));
         shootController = new MockShootController(this, (ImageView) findViewById(R.id.activity_mock_shoot_button));
         switchCameraController = new MockSwitchCameraController(this, (ImageView) findViewById(R.id.activity_mock_switch_camera));
 
-        container = (FrameLayout) findViewById(R.id.activity_mock_camera_container)
-        ;
+        container = (FrameLayout) findViewById(R.id.activity_mock_camera_container);
         fullCamera = findViewById(R.id.activity_mock_full_camera);
         squaredCamera = findViewById(R.id.activity_mock_squared_camera);
 
+        //Set listeners to our cameras (since they are mocks I got a little lazy for creating a controller of them)
         fullCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,6 +69,7 @@ public class MockActivity extends Activity {
             }
         });
 
+        //Manage events and initialize the camera
         flashController.setEventHandlerListener(eventManager);
         shootController.setEventHandlerListener(eventManager);
         switchCameraController.setEventHandlerListener(eventManager);
@@ -89,9 +92,18 @@ public class MockActivity extends Activity {
     }
 
     private void setCamera(CAMERA camera) {
+        if(currentCamera == camera)
+            return;
+
+        currentCamera = camera;
+
+        //Release all the previous camera things to avoid problems
         if(cameraController!=null)
             cameraController.stopCamera();
 
+        eventManager.removeListener(cameraController);
+
+        //Create the specified camera
         switch(camera) {
             case FULL:
                 cameraController = new MockCameraController(this, new BaseCameraView(this));
@@ -101,10 +113,13 @@ public class MockActivity extends Activity {
                 cameraController = new MockSquaredCameraController(this, new SquaredCameraView(this));
         }
 
+        //Set the event manager
         cameraController.setEventHandlerListener(eventManager);
 
+        //Update the default camera
         switchCameraController.setDefaultCameraMode(cameraController.getCameraManager().getCameraTypeManager().getCurrentCamera());
 
+        //Add and start it
         container.removeAllViews();
         container.addView(cameraController.getView());
 
