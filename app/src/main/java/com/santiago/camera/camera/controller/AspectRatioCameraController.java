@@ -7,7 +7,6 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.santiago.camera.camera.utils.picture.PictureCropper;
 import com.santiago.camera.camera.view.AspectRatioCameraView;
 import com.santiago.camera.configs.CameraConfiguration;
 
@@ -42,9 +41,15 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
     public void resize(double aspectRatio) {
         validateAspectRatio(aspectRatio);
 
-        this.aspectRatio = aspectRatio;
+        setAspectRatio(aspectRatio);
 
         startCamera();
+    }
+
+    public void setAspectRatio(double aspectRatio) {
+        if(aspectRatio > (SCREEN_HEIGHT / (double) SCREEN_WIDTH))
+            this.aspectRatio = ASPECT_RATIO_UNDEFINED;
+        else this.aspectRatio = aspectRatio;
     }
 
     @Override
@@ -53,7 +58,14 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
         getView().onPictureTaken(bitmap);
         getView().onPictureVisibilityChanged(View.VISIBLE);
 
-        Bitmap newBitmap = PictureCropper.crop(bitmap, aspectRatio);
+        Bitmap newBitmap = bitmap;
+
+        if(aspectRatio != ASPECT_RATIO_UNDEFINED) {
+            if (bitmap.getWidth() >= bitmap.getHeight())
+                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getHeight() / aspectRatio), (int) (bitmap.getHeight() / aspectRatio));
+            else
+                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getWidth() / aspectRatio), (int) (bitmap.getWidth() / aspectRatio));
+        }
 
         //Notify
         onPictureGenerated(newBitmap);
@@ -62,10 +74,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
     @Override
     protected void updateSurface(Camera.Parameters parameters) {
         Camera.Size sizeGotten = parameters.getPreviewSize();
-        double sizeAspectRatio = sizeGotten.width / (float) sizeGotten.height;
-
-        if(Math.abs(sizeAspectRatio - aspectRatio) > BaseCameraSurfaceCallback.ASPECT_TOLERANCE)
-            setAspectRatio(aspectRatio, sizeAspectRatio);
+        updateViewAspectRatio(aspectRatio, sizeGotten.width / (float) sizeGotten.height);
 
         super.updateSurface(parameters);
     }
@@ -116,7 +125,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
         return false;
     }
 
-    private void setAspectRatio(double virtualRatio, double realRatio) {
+    private void updateViewAspectRatio(double virtualRatio, double realRatio) {
         if(ratioConflicts(realRatio))
             getView().setAspectRatio(virtualRatio, (SCREEN_HEIGHT / (double) SCREEN_WIDTH ) ,SCREEN_WIDTH);
         else getView().setAspectRatio(virtualRatio, realRatio, SCREEN_WIDTH);
@@ -199,7 +208,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
 
         public AspectRatioCameraController build() {
             AspectRatioCameraController controller = new AspectRatioCameraController(context);
-            controller.aspectRatio = aspectRatio;
+            controller.setAspectRatio(aspectRatio);
 
             if(pictureListener != null)
                 controller.setPictureGeneratedListener(pictureListener);
