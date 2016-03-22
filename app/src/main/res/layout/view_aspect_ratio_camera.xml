@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
 
-            android:background="@color/mock_black" />
+            android:background="@color/colorPrimary" />
 
     </FrameLayout>
 

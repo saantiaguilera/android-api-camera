@@ -74,7 +74,13 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
     @Override
     protected void updateSurface(Camera.Parameters parameters) {
         Camera.Size sizeGotten = parameters.getPreviewSize();
-        updateViewAspectRatio(aspectRatio, sizeGotten.width / (float) sizeGotten.height);
+
+        double cameraAspectRatio = sizeGotten.width / (float) sizeGotten.height;
+
+        if(aspectRatio == ASPECT_RATIO_UNDEFINED)
+            aspectRatio = cameraAspectRatio;
+
+        updateViewAspectRatio(aspectRatio, cameraAspectRatio);
 
         super.updateSurface(parameters);
     }

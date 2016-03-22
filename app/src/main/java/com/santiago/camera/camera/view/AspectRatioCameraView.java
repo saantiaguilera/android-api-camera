@@ -34,7 +34,7 @@ public class AspectRatioCameraView extends FrameLayout implements CameraSurfaceH
     public AspectRatioCameraView (Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        inflate(context, R.layout.view_squared_camera, this);
+        inflate(context, R.layout.view_aspect_ratio_camera, this);
 
         surfaceView = (SurfaceView) findViewById(R.id.view_aspect_ratio_camera_surface_view);
         pictureView = (ImageView) findViewById(R.id.view_aspect_ratio_camera_image_view);
