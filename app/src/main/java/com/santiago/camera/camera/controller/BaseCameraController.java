@@ -10,7 +10,6 @@ import android.view.View;
 
 import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
 import com.santiago.camera.camera.utils.picture.CameraPictureUtilities;
-import com.santiago.camera.camera.utils.picture.PictureCropper;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 import com.santiago.camera.manager.CameraManager;
 import com.santiago.camera.manager.orientation.CameraOrientationManager;
@@ -37,7 +36,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
     private Camera camera;
 
     public BaseCameraController(Context context) {
-        this(context, null);
+        this(context ,null);
     }
 
     public BaseCameraController(Context context, T t) {
@@ -82,10 +81,14 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             //Since the surface is created, set the camera in it
             camera.setPreviewDisplay(surfaceHolder);
 
-            surfaceCallback.refreshSurface();
+            surfaceCallback.onDataChanged();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    protected Camera getCamera() {
+        return camera;
     }
 
     /*---------------------------Methods---------------------------------*/
@@ -112,22 +115,21 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 if (isFrontCamera)
                     bitmap = CameraPictureUtilities.mirrorImage(bitmap);
 
-                //Set the picture
-                getView().onPictureTaken(bitmap);
-                getView().onPictureVisibilityChanged(View.VISIBLE);
-
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
 
-                //Crop it if necessary
-                if(getCropGravity()==null)
-                    bitmap = PictureCropper.crop(bitmap, getPictureAspectRatio());
-                else bitmap = PictureCropper.crop(bitmap, getPictureAspectRatio(), getCropGravity());
-
-                //Notify
-                onPictureGenerated(bitmap);
+                attachPicture(bitmap);
             }
         });
+    }
+
+    protected void attachPicture(Bitmap bitmap) {
+        //Set the picture
+        getView().onPictureTaken(bitmap);
+        getView().onPictureVisibilityChanged(View.VISIBLE);
+
+        //Notify
+        onPictureGenerated(bitmap);
     }
 
     /**
@@ -171,30 +173,95 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
     protected abstract void onPictureGenerated(Bitmap bitmap);
 
-    /*------------------------Overrideable methods------------------------*/
+    /*----------------------Surface Callback-------------------------------*/
 
-    /**
-     * If the camera is not using match match, and has a defined aspect ratio, override this method
-     */
-    protected float getPictureAspectRatio() {
-        return PictureCropper.ASPECT_RATIO_UNDEFINED;
+    protected void updateSurface(Camera.Parameters parameters) {
+        //Update data
+        camera.setParameters(parameters);
+        camera.startPreview();
+
+        surfaceActive = true;
+    }
+
+    protected void refreshSurface(int width, int height) {
+        //If we dont track of the width/height of our surface, we cant do this operation
+        if(width == BaseCameraSurfaceCallback.NO_VALUE && height == BaseCameraSurfaceCallback.NO_VALUE)
+            return;
+
+        //Data will be using
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size previewSize;
+        Camera.Size pictureSize;
+
+        //Get the best size for this surface and if exists, set it and calculate the one for the picture (with the ratio setted for the preview)
+        previewSize = approximateToBestCameraSize(width, height, parameters.getSupportedPreviewSizes());
+
+        if(previewSize!=null) {
+            parameters.setPreviewSize(previewSize.width, previewSize.height);
+
+            //Get the best picture size for this surface, in relation with the setted preview size and set it
+            pictureSize = approximateToBestCameraSize(previewSize.height, previewSize.width, parameters.getSupportedPictureSizes());
+            if (pictureSize != null)
+                parameters.setPictureSize(pictureSize.width, pictureSize.height);
+        }
+
+        updateSurface(parameters);
     }
 
     /**
-     * If the camera is not using match match, and has a defined aspect ratio
-     * we can crop the image in different ways (like centered, from top, etc)
-     * Override this method to decide it
+     * Get the best size resembling the provided aspect ratio from the list of sizes
+     *
+     * @note <strong>width its the height and height its the width, since physical camera
+     * is installed in landscape mode (this means, x is y and y is x.</strong>
+     *
+     * @note TODO We could (im really doubting it, but its worth a try) compare when we are in preview sizes and check if
+     * the aspect ratio exists in the picture sizes. If it does we continue the operation if not we dont use that size
+     * That way we can be sure that our picture and preview will match.
+     *
+     * @param width
+     * @param height
+     * @param sizes
+     * @return Best Size that fits the given parameters
      */
-    protected PictureCropper.CROP_GRAVITY getCropGravity() {
-        return null;
+    protected Camera.Size approximateToBestCameraSize(int width, int height, List<Camera.Size> sizes) {
+        if (sizes == null)
+            return null;
+
+        double targetRatio = (double) height / width;
+
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+
+            if (Math.abs(ratio - targetRatio) > BaseCameraSurfaceCallback.ASPECT_TOLERANCE)
+                continue;
+
+            if (Math.abs(size.height - height) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - height);
+            }
+        }
+
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - height) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - height);
+                }
+            }
+        }
+
+        return optimalSize;
     }
 
-    /*----------------------Surface Callback Class------------------------*/
+    protected class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
 
-    private class BaseCameraSurfaceCallback implements SurfaceHolder.Callback {
-
-        private static final double ASPECT_TOLERANCE = 0.05D;
-        private static final int NO_VALUE = -1;
+        public static final double ASPECT_TOLERANCE = 0.05D;
+        public static final int NO_VALUE = -1;
 
         private int width = NO_VALUE;
         private int height = NO_VALUE;
@@ -226,87 +293,13 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
             this.width = width;
             this.height = height;
 
-            refreshSurface();
+            refreshSurface(width, height);
         }
 
         public void surfaceDestroyed(SurfaceHolder holder) { }
 
-        protected void refreshSurface() {
-            //If we dont track of the width/height of our surface, we cant do this operation
-            if(width==NO_VALUE && height==NO_VALUE)
-                return;
-
-            //Data will be using
-            Camera.Parameters parameters = camera.getParameters();
-            Camera.Size previewSize;
-            Camera.Size pictureSize;
-
-            //Get the best size for this surface and if exists, set it and calculate the one for the picture (with the ratio setted for the preview)
-            previewSize = getBestPictureSize(width, height, parameters.getSupportedPreviewSizes());
-            if(previewSize!=null) {
-                parameters.setPreviewSize(previewSize.width, previewSize.height);
-
-                //Get the best picture size for this surface, in relation with the setted preview size and set it
-                pictureSize = getBestPictureSize(previewSize.height, previewSize.width, parameters.getSupportedPictureSizes());
-                if (pictureSize != null)
-                    parameters.setPictureSize(pictureSize.width, pictureSize.height);
-            }
-
-            //Update data
-            camera.setParameters(parameters);
-            camera.startPreview();
-
-            surfaceActive = true;
-        }
-
-        /**
-         * Get the best size resembling the provided aspect ratio from the list of sizes
-         *
-         * @note <strong>width its the height and height its the width, since physical camera
-         * is installed in landscape mode (this means, x is y and y is x.</strong>
-         *
-         * @note TODO We could (im really doubting it, but its worth a try) compare when we are in preview sizes and check if
-         * the aspect ratio exists in the picture sizes. If it does we continue the operation if not we dont use that size
-         * That way we can be sure that our picture and preview will match.
-         *
-         * @param width
-         * @param height
-         * @param sizes
-         * @return Best Size that fits the given parameters
-         */
-        private Camera.Size getBestPictureSize(int width, int height, List<Camera.Size> sizes) {
-            if (sizes == null)
-                return null;
-
-            double targetRatio = (double) height / width;
-
-            Camera.Size optimalSize = null;
-            double minDiff = Double.MAX_VALUE;
-
-            for (Camera.Size size : sizes) {
-                double ratio = (double) size.width / size.height;
-
-                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
-                    continue;
-
-                if (Math.abs(size.height - height) < minDiff) {
-                    optimalSize = size;
-                    minDiff = Math.abs(size.height - height);
-                }
-            }
-
-            if (optimalSize == null) {
-                minDiff = Double.MAX_VALUE;
-
-                for (Camera.Size size : sizes) {
-                    if (Math.abs(size.height - height) < minDiff) {
-                        optimalSize = size;
-                        minDiff = Math.abs(size.height - height);
-                    }
-                }
-            }
-
-            return optimalSize;
+        public void onDataChanged() {
+            refreshSurface(width, height);
         }
 
     }

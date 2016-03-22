@@ -4,44 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <com.santiago.camera.camera.view.AspectRatioCameraView
         android:id="@+id/activity_mock_camera_container"
 
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <LinearLayout
+    <com.santiago.camera.mocks.view.MockInputAspectRatioView
+        android:id="@+id/activity_mock_input_aspect_ratio"
+
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
 
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
 
-        <TextView
-            android:id="@+id/activity_mock_full_camera"
-
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-
-            android:gravity="center"
-
-            android:text="Full"
-            android:textColor="@color/mock_white"/>
-
-        <TextView
-            android:id="@+id/activity_mock_squared_camera"
-
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-
-            android:gravity="center"
-
-            android:text="Squared"
-            android:textColor="@color/mock_white"/>
-
-    </LinearLayout>
+        android:layout_margin="12dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

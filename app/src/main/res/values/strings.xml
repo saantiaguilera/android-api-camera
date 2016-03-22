@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ResizeableCamera</string>
+    <string name="mock_aspect_ratio_hint">Enter the desired aspect ratio</string>
 </resources>

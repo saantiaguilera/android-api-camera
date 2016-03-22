@@ -1,0 +1,26 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditText
+        android:id="@+id/mock_view_aspect_ratio_edit_text"
+
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+
+        android:textColor="@color/mock_white"
+        android:textColorHint="@color/mock_white"
+        android:hint="@string/mock_aspect_ratio_hint"
+
+        android:inputType="numberDecimal"
+
+        android:paddingRight="8dp"/>
+
+    <ImageView
+        android:id="@+id/mock_view_set_aspect_ratio_image_view"
+
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+
+        android:src="@mipmap/ic_launcher"/>
+
+</merge>

@@ -13,11 +13,11 @@ public class PictureCropper {
     //If w>h TOP==LEFT && BOTTOM==RIGHT
     public enum CROP_GRAVITY { TOP, CENTER, BOTTOM, LEFT, RIGHT }
 
-    public static Bitmap crop(@NonNull Bitmap source, float aspectRatio) {
+    public static Bitmap crop(@NonNull Bitmap source, double aspectRatio) {
         return crop(source, aspectRatio, CROP_GRAVITY.TOP);
     }
 
-    public static Bitmap crop(@NonNull Bitmap source, float aspectRatio, @NonNull CROP_GRAVITY gravity) {
+    public static Bitmap crop(@NonNull Bitmap source, double aspectRatio, @NonNull CROP_GRAVITY gravity) {
         if(aspectRatio == ASPECT_RATIO_UNDEFINED)
             return source;
 
