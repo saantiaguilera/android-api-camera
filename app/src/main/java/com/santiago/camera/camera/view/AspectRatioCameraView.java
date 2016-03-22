@@ -18,6 +18,8 @@ import com.santiago.camera.camera.utils.picture.CameraPictureCallback;
 import com.santiago.camera.camera.utils.surface.CameraSurfaceHolder;
 
 /**
+ * View that adapts to a given aspect ratio.
+ *
  * Created by santiago on 21/03/16.
  */
 public class AspectRatioCameraView extends FrameLayout implements CameraSurfaceHolder, CameraPictureCallback {
@@ -52,16 +54,27 @@ public class AspectRatioCameraView extends FrameLayout implements CameraSurfaceH
         pictureView.setImageBitmap(picture);
     }
 
+    /**
+     * Sets a given aspectRatio
+     * @param virtualRatio ratio of the surfaceview the user will be seeing
+     * @param realRatio ratio of the surfaceview it will be hidden to the user (to let the user see exactly the ratio he prompted. Since camera.size isnt always exactly to our ratio we want)
+     * @param screenWidth width of the screen . TODO REFACTOR IT and use the width of this view in MATCH_PARENT state
+     */
     public void setAspectRatio(double virtualRatio, double realRatio, int screenWidth) {
         FrameLayout.LayoutParams containerParams;
-
+        /**
+         * If its undefined the virtual ratio. This means we should try to fill entirely
+         * It should be false by all means. Since aspectRatio is expected to change from undefined to the best camera.size obtained
+         */
         if (virtualRatio == AspectRatioCameraController.ASPECT_RATIO_UNDEFINED) {
             containerParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
             blockView.setVisibility(View.GONE);
         } else {
+            //Else set the container ("what the user sees") to the aspect ratio we give
             containerParams = new FrameLayout.LayoutParams(screenWidth, (int) (screenWidth * realRatio));
 
+            //And move a "hiding view" with size of the "error" ratio we got
             FrameLayout.LayoutParams blackBorderParams = new FrameLayout.LayoutParams(screenWidth, (int) (screenWidth * (realRatio - virtualRatio)));
             blackBorderParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
             blockView.setVisibility(View.VISIBLE);

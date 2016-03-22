@@ -71,9 +71,6 @@ public class MockActivity extends Activity {
 
     @EventMethod(MockAspectRatioChangedEvent.class)
     private void onAspectRatioChange(MockAspectRatioChangedEvent event) {
-        if(event.getAspectRatio() >= 2 || event.getAspectRatio() < 1)
-            return;
-
         cameraController.resizeCamera(event.getAspectRatio());
     }
 

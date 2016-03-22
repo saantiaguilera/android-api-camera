@@ -110,7 +110,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
                 int rotation = CameraPictureUtilities.getRotation(orientationManager.getDisplayOrientation(), orientationManager.getNormalOrientation(), orientationManager.getLayoutOrientation(), isFrontCamera);
 
-                bitmap = CameraPictureUtilities.rotatePicture(getContext(), rotation, bitmap);
+                bitmap = CameraPictureUtilities.rotatePicture(rotation, bitmap);
 
                 if (isFrontCamera)
                     bitmap = CameraPictureUtilities.mirrorImage(bitmap);

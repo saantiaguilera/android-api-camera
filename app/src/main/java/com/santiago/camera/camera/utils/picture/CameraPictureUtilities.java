@@ -4,11 +4,13 @@ package com.santiago.camera.camera.utils.picture;
  * Created by santi on 29/06/15.
  */
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.support.annotation.NonNull;
 
+/**
+ * Created by santiago on 20/08/15.
+ */
 public class CameraPictureUtilities {
 
     public static Bitmap mirrorImage(@NonNull Bitmap resultBitmap){
@@ -45,7 +47,7 @@ public class CameraPictureUtilities {
         return rotation;
     }
 
-    public static Bitmap rotatePicture(@NonNull Context context, int rotation, @NonNull Bitmap bitmap) {
+    public static Bitmap rotatePicture(int rotation, @NonNull Bitmap bitmap) {
         if (rotation != 0) {
             Bitmap oldBitmap = bitmap;
 
