@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.hardware.Camera;
-import android.view.View;
 
 import com.santiago.camera.camera.utils.surface.CameraMetrics;
 import com.santiago.camera.camera.view.AspectRatioCameraView;
@@ -22,6 +21,8 @@ import java.util.List;
  * Created by santiago on 21/03/16.
  */
 public class AspectRatioCameraController extends BaseCameraController<AspectRatioCameraView> {
+
+    private static final double ASPECT_RATIO_TOLERANCE = 0.01d;
 
     public static final int ASPECT_RATIO_FULLSCREEN = -1; //Value for fullscreen camera
 
@@ -76,17 +77,22 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
     }
 
     /**
-     * @Overriden attachPicture so that we crop the image depending on the aspectRatio we have.
-     * Everything else is as super.attachPicture(bitmap);
+     * @Overriden Crops the bitmap depending on the aspect ratio picked
      * @param bitmap
      */
     @Override
-    protected void attachPicture(Bitmap bitmap) {
-        //Set the picture
-        getView().onPictureTaken(bitmap);
-        getView().onPictureVisibilityChanged(View.VISIBLE);
+    protected Bitmap transform(Bitmap bitmap) {
+        /**
+         * @note: <strong>This is just done to avoid processing data. If we want to remove it, it should still work as intended. But this cases
+         * are already cropped or have a really low error</strong>
+         * @note: Since the aspect ratio we choose wont be exactly the h/w (unless you specifically set the operation), we use a tolerance (which is damn low so its good)
+         * If the bitmap has already our aspect ratio, we dont need to crop it !
+         * @note: When setting an aspect ratio it would be good to be precise ;)
+         */
+        if(Math.abs(aspectRatio - (SCREEN_HEIGHT / (double) SCREEN_WIDTH)) < ASPECT_RATIO_TOLERANCE || Math.abs(aspectRatio - ((double) bitmap.getWidth() / bitmap.getHeight())) < ASPECT_RATIO_TOLERANCE)
+            return bitmap;
 
-        Bitmap newBitmap = bitmap;
+        Bitmap newBitmap;
 
         /**
          * If the aspectRatio is defined, crop the image (from top, since our view has top gravity with this purpose)
@@ -94,17 +100,51 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
          * If you want a different gravity, in the previous branch I did a PictureCropper that considered the gravity.
          * But since this camera will be always top (I dont have time for doing it generic for layout gravity too)
          * Defaults to top
-         * @note: Refactor. I think the if is useless since aspectRatio will change value to the best ratio found. So it will always enter here.
+         *
+         * Explaining this monster:
+         *      If its front facing, the image will be displayed mirrored, this means it will be from bottom to top (yeah, weiiiiird). So on those ifs, we will be using instead of 0,0 as starts. One on zero (the lower one) and the other will be
+         *      the size of the bitmap - the ratio modification in that axis
+         *
+         *      Else, if we are a back camera, we just be using 0,0 as starting points and, while the lowest axis will remain intact, we will modify the higher (since we can lower it till it matches our desired ratio
+         *      We do this by doing !=axis * ratio
+         *      eg:
+         *              w
+         *      ------------------
+         *      \                \
+         *      \                \ h
+         *      \                \
+         *      ------------------
+         *
+         *      And the image we expect is
+         *            w
+         *      -------------
+         *      \            \
+         *      \            \ h
+         *      \            \
+         *      -------------
+         *      Then our bitmap should go from 0,0 to (h*ratio),h . Because h*ratio will be lower than w (unless we have a really anoying ratio, which in that
+         *      case we wont be here and it would be a ASPECT_RATIO_FULLSCREEN case, that is handled prior this) and then if we just want to calculate this new ratio:
+         *
+         *      ratio = w / h (common knowledge)
+         *
+         *      Then, since our new w is h * r: w / h = h * r / h = ratio
+         *
+         *      Get it ?
          */
-        if(aspectRatio != ASPECT_RATIO_FULLSCREEN) {
+        if(getCameraManager().getCameraTypeManager().getCurrentCamera().getCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             if (bitmap.getWidth() >= bitmap.getHeight())
-                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getHeight() / aspectRatio), (int) (bitmap.getHeight() / aspectRatio));
+                newBitmap = Bitmap.createBitmap(bitmap, bitmap.getWidth() - (int) (bitmap.getHeight() * aspectRatio), 0, (int) (bitmap.getHeight() * aspectRatio), bitmap.getHeight());
             else
-                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getWidth() / aspectRatio), (int) (bitmap.getWidth() / aspectRatio));
+                newBitmap = Bitmap.createBitmap(bitmap, 0, bitmap.getHeight() - (int) (bitmap.getWidth() * aspectRatio), bitmap.getWidth(), (int) (bitmap.getWidth() * aspectRatio));
+
+        } else {
+            if (bitmap.getWidth() >= bitmap.getHeight())
+                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getHeight() * aspectRatio), bitmap.getHeight());
+            else
+                newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), (int) (bitmap.getWidth() * aspectRatio));
         }
 
-        //Notify
-        onPictureGenerated(newBitmap);
+        return newBitmap;
     }
 
     /**

@@ -105,6 +105,8 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
+                bitmap = transform(bitmap);
+
                 boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT;
                 CameraOrientationManager orientationManager = cameraManager.getCameraOrientationManager();
 
@@ -118,19 +120,24 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
 
-                attachPicture(bitmap);
+                //Set the picture
+                getView().onPictureTaken(bitmap);
+                getView().onPictureVisibilityChanged(View.VISIBLE);
+
+                //Notify
+                onPictureGenerated(bitmap);
             }
         });
     }
 
-    protected void attachPicture(Bitmap bitmap) {
-        //Set the picture
-        getView().onPictureTaken(bitmap);
-        getView().onPictureVisibilityChanged(View.VISIBLE);
-
-        //Notify
-        onPictureGenerated(bitmap);
-    }
+    /**
+     * Override if you will do a transformation prior to me handling the bitmap
+     * @note: EXIF parameters wont be always setted, so avoid using it. Front camera for example dont have. Samsung mobiles also
+     * @note: Front camera mirroring + Rotations for leaving it as it should be are done by default, so no need to do them.
+     * @param source bitmap
+     * @return Transformed bitmap
+     */
+    protected Bitmap transform(Bitmap source) { return source; }
 
     /**
      * Call for starting the camera

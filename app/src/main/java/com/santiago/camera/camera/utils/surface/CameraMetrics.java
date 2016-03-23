@@ -14,6 +14,13 @@ import java.lang.reflect.Method;
  */
 public class CameraMetrics {
 
+    /**
+     * Gets the screen size of the android phone.
+     * Note that is much more complex than the simple
+     * getDisplay().getHeight/getWidth thing we know about (because this doesnt take into account notificationBar and globalButtonsLayout)
+     * @param context
+     * @return
+     */
     public static Point getAndroidScreenSize(Context context) {
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         int realWidth;

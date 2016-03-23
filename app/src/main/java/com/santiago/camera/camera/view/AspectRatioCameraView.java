@@ -69,22 +69,31 @@ public class AspectRatioCameraView extends FrameLayout implements CameraSurfaceH
         if (virtualRatio == AspectRatioCameraController.ASPECT_RATIO_FULLSCREEN) {
             containerParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
+            FrameLayout.LayoutParams pictureParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            pictureParams.gravity = Gravity.TOP;
+            pictureView.setLayoutParams(pictureParams);
+
             blockView.setVisibility(View.GONE);
         } else {
             //Else set the container ("what the user sees") to the aspect ratio we give
             containerParams = new FrameLayout.LayoutParams(screenWidth, (int) (screenWidth * realRatio));
+
+            FrameLayout.LayoutParams pictureParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (screenWidth * virtualRatio));
+            pictureParams.gravity = Gravity.TOP;
+            pictureView.setLayoutParams(pictureParams);
 
             //And move a "hiding view" with size of the "error" ratio we got
             FrameLayout.LayoutParams blackBorderParams = new FrameLayout.LayoutParams(screenWidth, (int) (screenWidth * (realRatio - virtualRatio)));
             blackBorderParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
             blockView.setVisibility(View.VISIBLE);
             blockView.setLayoutParams(blackBorderParams);
+
+
         }
 
         containerParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         cameraContainer.setLayoutParams(containerParams);
     }
-
     @Override
     public void onPictureVisibilityChanged(int visibility) {
         pictureView.setVisibility(visibility);
