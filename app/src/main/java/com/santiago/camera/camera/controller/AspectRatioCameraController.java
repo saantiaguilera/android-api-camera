@@ -2,11 +2,11 @@ package com.santiago.camera.camera.controller;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.hardware.Camera;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 
+import com.santiago.camera.camera.utils.surface.CameraMetrics;
 import com.santiago.camera.camera.view.AspectRatioCameraView;
 import com.santiago.camera.configs.CameraConfiguration;
 
@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class AspectRatioCameraController extends BaseCameraController<AspectRatioCameraView> {
 
-    public static final int ASPECT_RATIO_UNDEFINED = -1; // Value for a fullscreen camera
+    public static final int ASPECT_RATIO_FULLSCREEN = -1; //Value for fullscreen camera
 
     //Holds a reference to the mobile screen dimens
     private static int SCREEN_WIDTH;
@@ -46,11 +46,10 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
         super(context);
 
         //Set the mobile dimens
-        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+        Point point = CameraMetrics.getAndroidScreenSize(context);
 
-        SCREEN_WIDTH = display.getWidth();
-        SCREEN_HEIGHT = display.getHeight();
+        SCREEN_WIDTH = point.x;
+        SCREEN_HEIGHT = point.y;
     }
 
     /**
@@ -71,8 +70,8 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
      */
     private void setAspectRatio(double aspectRatio) {
         //In case the aspect ratio is lower than 1 (be careful with our constant) or is higher than our mobile boundaries, set it to undefined. Else normal setter.
-        if((aspectRatio < 1 && aspectRatio != ASPECT_RATIO_UNDEFINED) || aspectRatio > (SCREEN_HEIGHT / (double) SCREEN_WIDTH))
-            this.aspectRatio = ASPECT_RATIO_UNDEFINED;
+        if((aspectRatio < 1 && aspectRatio != ASPECT_RATIO_FULLSCREEN) || aspectRatio > (SCREEN_HEIGHT / (double) SCREEN_WIDTH))
+            this.aspectRatio = ASPECT_RATIO_FULLSCREEN;
         else this.aspectRatio = aspectRatio;
     }
 
@@ -97,7 +96,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
          * Defaults to top
          * @note: Refactor. I think the if is useless since aspectRatio will change value to the best ratio found. So it will always enter here.
          */
-        if(aspectRatio != ASPECT_RATIO_UNDEFINED) {
+        if(aspectRatio != ASPECT_RATIO_FULLSCREEN) {
             if (bitmap.getWidth() >= bitmap.getHeight())
                 newBitmap = Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getHeight() / aspectRatio), (int) (bitmap.getHeight() / aspectRatio));
             else
@@ -133,7 +132,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
          * @note: I think I have read somewhere that you can do a "not fixed size" surface view. So it will itself resize to the camera.size
          * Maybe look for it and implement it IN THIS PARTICULAR CASE (that we wont to adapt to the best camera.size)
          */
-        if(aspectRatio == ASPECT_RATIO_UNDEFINED)
+        if(aspectRatio == ASPECT_RATIO_FULLSCREEN)
             aspectRatio = cameraAspectRatio;
 
         //TODO Refactor!! Set it. I pass SCREEN_WIDTH since it will be used as max width possible. Shouldnt it use the layout_width of the view itself ? Since we dont know if all cases will be SCREEN_WIDTH as layout_width
@@ -154,10 +153,10 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
     @Override
     protected void refreshSurface(int width, int height) {
         //If we dont track of the width/height of our surface, we cant do this operation
-        if(aspectRatio == ASPECT_RATIO_UNDEFINED)
-            super.refreshSurface(width, height);
+        if (aspectRatio == ASPECT_RATIO_FULLSCREEN)
+            super.refreshSurface(SCREEN_WIDTH, SCREEN_HEIGHT);
         else {
-            if(width == BaseCameraSurfaceCallback.NO_VALUE)
+            if (width == BaseCameraSurfaceCallback.NO_VALUE)
                 return;
 
             //We will use our own height. It should be w*r. So lets try to find the best approximation with this
@@ -171,7 +170,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
             //Get the best size for this surface and if exists, set it and calculate the one for the picture (with the ratio setted for the preview)
             previewSize = approximateToBestCameraSize(width, newHeight, parameters.getSupportedPreviewSizes());
 
-            if(previewSize!=null) {
+            if (previewSize != null) {
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
 
                 //Get the best picture size for this surface, in relation with the setted preview size and set it
@@ -249,7 +248,7 @@ public class AspectRatioCameraController extends BaseCameraController<AspectRati
      */
     public static class Builder {
 
-        private double aspectRatio = ASPECT_RATIO_UNDEFINED;
+        private double aspectRatio = ASPECT_RATIO_FULLSCREEN;
         private Context context;
         private PictureGeneratedListener pictureListener = null;
         private CameraListener cameraListener = null;

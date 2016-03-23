@@ -66,7 +66,7 @@ public class AspectRatioCameraView extends FrameLayout implements CameraSurfaceH
          * If its undefined the virtual ratio. This means we should try to fill entirely
          * It should be false by all means. Since aspectRatio is expected to change from undefined to the best camera.size obtained
          */
-        if (virtualRatio == AspectRatioCameraController.ASPECT_RATIO_UNDEFINED) {
+        if (virtualRatio == AspectRatioCameraController.ASPECT_RATIO_FULLSCREEN) {
             containerParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
             blockView.setVisibility(View.GONE);
