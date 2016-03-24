@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -101,31 +102,12 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
         camera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
-                //Get the bitmap (dont recycle it since it will delete the byte array and camera still uses it
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-                bitmap = transform(bitmap);
-
-                boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT;
-                CameraOrientationManager orientationManager = cameraManager.getCameraOrientationManager();
-
-                int rotation = CameraPictureUtilities.getRotation(orientationManager.getDisplayOrientation(), orientationManager.getNormalOrientation(), orientationManager.getLayoutOrientation(), isFrontCamera);
-
-                bitmap = CameraPictureUtilities.rotatePicture(rotation, bitmap);
-
-                if (isFrontCamera)
-                    bitmap = CameraPictureUtilities.mirrorImage(bitmap);
+            public void onPictureTaken(final byte[] data, Camera camera) {
+                //We should process the bitmap an a separate thread, (but UI things should still be handled in the main thread)
+                new PictureTakenTask().execute(data);
 
                 //Stop the camera since it wont be used while the picture is showing
                 stopCamera();
-
-                //Set the picture
-                getView().onPictureTaken(bitmap);
-                getView().onPictureVisibilityChanged(View.VISIBLE);
-
-                //Notify
-                onPictureGenerated(bitmap);
             }
         });
     }
@@ -136,6 +118,7 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
      * @note: Front camera mirroring + Rotations for leaving it as it should be are done by default, so no need to do them.
      * @param source bitmap
      * @return Transformed bitmap
+     * @Async Beware this is not executed in the UI thread, so dont do UI changes.
      */
     protected Bitmap transform(Bitmap source) { return source; }
 
@@ -307,6 +290,41 @@ public abstract class BaseCameraController<T extends View & CameraSurfaceHolder 
 
         public void onDataChanged() {
             refreshSurface(width, height);
+        }
+
+    }
+
+    /*-------------------------------------------------------Threading------------------------------------------------------------------*/
+
+    public class PictureTakenTask extends AsyncTask<byte[], Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(byte[]... params) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(params[0], 0, params[0].length);
+
+            bitmap = transform(bitmap);
+
+            boolean isFrontCamera = cameraManager.getCameraTypeManager().getCurrentCamera().getCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT;
+            CameraOrientationManager orientationManager = cameraManager.getCameraOrientationManager();
+
+            int rotation = CameraPictureUtilities.getRotation(orientationManager.getDisplayOrientation(), orientationManager.getNormalOrientation(), orientationManager.getLayoutOrientation(), isFrontCamera);
+
+            bitmap = CameraPictureUtilities.rotatePicture(rotation, bitmap);
+
+            if (isFrontCamera)
+                bitmap = CameraPictureUtilities.mirrorImage(bitmap);
+
+            return bitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            //Set the picture
+            getView().onPictureTaken(bitmap);
+            getView().onPictureVisibilityChanged(View.VISIBLE);
+
+            //Notify
+            onPictureGenerated(bitmap);
         }
 
     }
